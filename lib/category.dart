@@ -19,7 +19,7 @@ class _CategoryPageState extends State<CategoryPage> {
   final prefsFuture = SharedPreferences.getInstance();
   final TextEditingController addSubcategoryController =
       TextEditingController();
-  final TextEditingController addItemController = TextEditingController();
+  final Map<String, TextEditingController> addItemsControllerBySubcategory = {};
 
   _CategoryPageState({required this.categoryId});
 
@@ -28,7 +28,7 @@ class _CategoryPageState extends State<CategoryPage> {
     return prefs.getStringList('needsly.$categoryId') ?? [];
   }
 
-  void saveSubcategories(List<String> subcategories) async {
+  void updateSubcategories(List<String> subcategories) async {
     final prefs = await prefsFuture;
     await prefs.setStringList('needsly.$categoryId', subcategories);
   }
@@ -36,12 +36,16 @@ class _CategoryPageState extends State<CategoryPage> {
   void removeSubcategory(String subcategory) async {
     final prefs = await prefsFuture;
     await prefs.remove('needsly.$categoryId.$subcategory');
-    saveSubcategories(itemsBySubcategories.keys.toList());
+    final subcategories = prefs.getStringList('needsly.$categoryId') ?? [];
+    subcategories.remove(subcategory);
+    updateSubcategories(subcategories);
   }
 
   void addSubcategoryWithItems(String subcategory, List<String> items) async {
     final prefs = await prefsFuture;
+    final subcategories = prefs.getStringList('needsly.$categoryId') ?? [];
     await prefs.setStringList('needsly.$categoryId.$subcategory', items);
+    updateSubcategories([...subcategories, subcategory]);
   }
 
   void renameSubcategory(String fromSubcategory, String toSubcategory) async {
@@ -53,16 +57,12 @@ class _CategoryPageState extends State<CategoryPage> {
 
   Future<List<String>> loadItems(String subcategoryId) async {
     final prefs = await prefsFuture;
-    return prefs.getStringList('needsly.$categoryId.$subcategoryId.items') ??
-        [];
+    return prefs.getStringList('needsly.$categoryId.$subcategoryId') ?? [];
   }
 
   Future<void> saveItems(String subcategoryId, List<String> items) async {
     final prefs = await prefsFuture;
-    await prefs.setStringList(
-      'needsly.$categoryId.$subcategoryId.items',
-      items,
-    );
+    await prefs.setStringList('needsly.$categoryId.$subcategoryId', items);
   }
 
   void onRenameSubcategory(String subcategory) {
@@ -111,7 +111,7 @@ class _CategoryPageState extends State<CategoryPage> {
     setState(() {
       itemsBySubcategories.remove(subcategory);
     });
-    saveSubcategories(itemsBySubcategories.keys.toList());
+    updateSubcategories(itemsBySubcategories.keys.toList());
   }
 
   void onAddSubcategory() {
@@ -131,18 +131,19 @@ class _CategoryPageState extends State<CategoryPage> {
   }
 
   void onAddItem(String subcategory) {
-    final text = addItemController.text.trim();
+    final controller = addItemsControllerBySubcategory[subcategory];
+    final text = controller?.text.trim();
     final items = itemsBySubcategories[subcategory] ?? [];
     if (items.contains(text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Item already exists in this subcategory!')),
       );
       return;
-    } else if (text.isNotEmpty) {
+    } else if (text != null && text.isNotEmpty) {
       final updatedItems = [...items, text];
       setState(() {
         itemsBySubcategories[subcategory] = updatedItems;
-        addItemController.clear();
+        controller?.clear();
       });
       saveItems(subcategory, updatedItems);
     }
@@ -242,40 +243,26 @@ class _CategoryPageState extends State<CategoryPage> {
           children: [
             addSubcategorySegment,
             ...itemsBySubcategories.entries.map((subcategoryEntry) {
+              final subcategoryKey = subcategoryEntry.key;
+              addItemsControllerBySubcategory[subcategoryKey] =
+                  TextEditingController();
               return ExpansionTile(
-                title: Text(subcategoryEntry.key),
+                title: Text(subcategoryKey, style: TextStyle(fontWeight: FontWeight.bold)),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: Icon(Icons.edit),
-                      onPressed: () =>
-                          onRenameSubcategory(subcategoryEntry.key),
+                      onPressed: () => onRenameSubcategory(subcategoryKey),
                     ),
                     IconButton(
                       icon: Icon(Icons.delete),
-                      onPressed: () =>
-                          onRemoveSubcategory(subcategoryEntry.key),
+                      onPressed: () => onRemoveSubcategory(subcategoryKey),
                     ),
                   ],
                 ),
                 childrenPadding: EdgeInsets.all(16),
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: addItemController,
-                          decoration: InputDecoration(hintText: 'Add item'),
-                          onSubmitted: (_) => onAddItem(subcategoryEntry.key),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => onAddItem(subcategoryEntry.key),
-                        icon: Icon(Icons.add),
-                      ),
-                    ],
-                  ),
                   ...subcategoryEntry.value.asMap().entries.map((item) {
                     return ListTile(
                       title: Text(item.value),
@@ -285,22 +272,38 @@ class _CategoryPageState extends State<CategoryPage> {
                           IconButton(
                             icon: Icon(Icons.edit),
                             onPressed: () =>
-                                onRenameItem(subcategoryEntry.key, item.key),
+                                onRenameItem(subcategoryKey, item.key),
                           ),
                           IconButton(
                             icon: Icon(Icons.delete),
                             onPressed: () =>
-                                onRemoveItem(subcategoryEntry.key, item.key),
+                                onRemoveItem(subcategoryKey, item.key),
                           ),
                           IconButton(
                             icon: Icon(Icons.done),
                             onPressed: () =>
-                                onResolveItem(subcategoryEntry.key, item.key),
+                                onResolveItem(subcategoryKey, item.key),
                           ),
                         ],
                       ),
                     );
                   }),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller:
+                              addItemsControllerBySubcategory[subcategoryKey],
+                          decoration: InputDecoration(hintText: 'Add item'),
+                          onSubmitted: (_) => onAddItem(subcategoryKey),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => onAddItem(subcategoryKey),
+                        icon: Icon(Icons.add),
+                      ),
+                    ],
+                  ),
                 ],
               );
             }),
