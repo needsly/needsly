@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// TODO: persistent storing does not work
-
 class CategoryPage extends StatefulWidget {
   final String categoryId;
 
