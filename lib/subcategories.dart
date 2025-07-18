@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/components/add_row.dart';
+import 'package:needsly/components/category_row_buttons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoryPage extends StatefulWidget {
@@ -62,46 +63,13 @@ class CategoryPageState extends State<CategoryPage> {
     await prefs.setStringList('needsly.$categoryId.$subcategoryId', items);
   }
 
-  void onRenameSubcategory(String subcategory) {
-    final TextEditingController renameController = TextEditingController(
-      text: subcategory,
-    );
-
+  void onRenameSubcategory(String subcategory, String toSubcategory) {
     final items = itemsBySubcategories[subcategory];
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Rename subcategory'),
-          content: TextField(
-            controller: renameController,
-            decoration: InputDecoration(hintText: 'Enter new subcategory name'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final toSubcategory = renameController.text.trim();
-                setState(() {
-                  itemsBySubcategories.remove(subcategory);
-                  itemsBySubcategories[toSubcategory] = items ?? [];
-                  renameController.clear();
-                });
-                renameSubcategory(subcategory, toSubcategory);
-                Navigator.of(context).pop();
-              },
-              child: Text('Rename'),
-            ),
-          ],
-        );
-      },
-    );
+    setState(() {
+      itemsBySubcategories.remove(subcategory);
+      itemsBySubcategories[toSubcategory] = items ?? [];
+    });
+    renameSubcategory(subcategory, toSubcategory);
   }
 
   void onRemoveSubcategory(subcategory) {
@@ -235,18 +203,11 @@ class CategoryPageState extends State<CategoryPage> {
                   subcategoryKey,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () => onRenameSubcategory(subcategoryKey),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () => onRemoveSubcategory(subcategoryKey),
-                    ),
-                  ],
+                trailing: ModifySubcategoryRow(
+                  context: context,
+                  subcategory: subcategoryKey,
+                  onRename: onRenameSubcategory,
+                  onRemove: onRemoveSubcategory,
                 ),
                 childrenPadding: EdgeInsets.all(16),
                 children: [

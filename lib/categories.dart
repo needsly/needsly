@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/components/add_row.dart';
-import 'package:needsly/components/category_buttons.dart';
+import 'package:needsly/components/category_row_buttons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'subcategories.dart';
@@ -98,7 +98,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       ),
                     );
                   },
-                  trailing: ModifyCategoryRow(
+                  trailing: CategoryRowButtons(
                     context: context,
                     category: _categories[index],
                     index: index,
