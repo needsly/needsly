@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:needsly/components/add_row.dart';
+import 'package:needsly/components/category_buttons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'subcategories.dart';
@@ -15,7 +17,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
   final List<String> _categories = [];
   final prefsFuture = SharedPreferences.getInstance();
 
-  final TextEditingController addCustomCategoryController = TextEditingController();
+  final TextEditingController addCustomCategoryController =
+      TextEditingController();
 
   Future<List<String>> loadCategories() async {
     final prefs = await prefsFuture;
@@ -27,8 +30,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
     await prefs.setStringList('needsly.categories', items);
   }
 
-  void onAddCategory() {
-    final text = addCustomCategoryController.text.trim();
+  void onAddCategory(TextEditingController controller) {
+    final text = controller.text.trim();
     if (_categories.contains(text)) {
       ScaffoldMessenger.of(
         context,
@@ -37,7 +40,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     } else if (text.isNotEmpty) {
       setState(() {
         _categories.add(text);
-        addCustomCategoryController.clear();
+        controller.clear();
       });
       saveCategories(_categories);
     }
@@ -50,40 +53,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
     saveCategories(_categories);
   }
 
-  void onRenameCategory(int index) {
-    final TextEditingController renameController = TextEditingController(
-      text: _categories[index],
-    );
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Rename Category'),
-          content: TextField(
-            controller: renameController,
-            decoration: InputDecoration(hintText: 'Enter new name'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _categories[index] = renameController.text.trim();
-                });
-                saveCategories(_categories);
-                Navigator.of(context).pop();
-              },
-              child: Text('Rename'),
-            ),
-          ],
-        );
-      },
-    );
+  void onRenameCategory(int index, String toCategory) {
+    setState(() {
+      _categories[index] = toCategory;
+    });
+    saveCategories(_categories);
   }
 
   @override
@@ -106,21 +80,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
         child: Column(
           children: [
             SizedBox(height: 12),
-            // Text field to add custom option
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: addCustomCategoryController,
-                    decoration: InputDecoration(
-                      hintText: 'Add custom category',
-                    ),
-                    onSubmitted: (_) => onAddCategory(),
-                  ),
-                ),
-                IconButton(icon: Icon(Icons.add), onPressed: onAddCategory),
-              ],
-            ),
+            AddCategoryRow(onAdd: onAddCategory),
             SizedBox(height: 16),
             // Display list
             Expanded(
@@ -138,18 +98,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       ),
                     );
                   },
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () => onRenameCategory(index),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () => onRemoveCategory(index),
-                      ),
-                    ],
+                  trailing: ModifyCategoryRow(
+                    context: context,
+                    category: _categories[index],
+                    index: index,
+                    onRename: onRenameCategory,
+                    onRemove: onRemoveCategory,
                   ),
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:needsly/components/add_row.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoryPage extends StatefulWidget {
@@ -8,18 +9,16 @@ class CategoryPage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() =>
-      _CategoryPageState(categoryId: categoryId);
+      CategoryPageState(categoryId: categoryId);
 }
 
-class _CategoryPageState extends State<CategoryPage> {
+class CategoryPageState extends State<CategoryPage> {
   final String categoryId;
   final Map<String, List<String>> itemsBySubcategories = {};
   final prefsFuture = SharedPreferences.getInstance();
-  final TextEditingController addSubcategoryController =
-      TextEditingController();
   final Map<String, TextEditingController> addItemsControllerBySubcategory = {};
 
-  _CategoryPageState({required this.categoryId});
+  CategoryPageState({required this.categoryId});
 
   Future<List<String>> loadSubcategories() async {
     final prefs = await prefsFuture;
@@ -112,8 +111,8 @@ class _CategoryPageState extends State<CategoryPage> {
     updateSubcategories(itemsBySubcategories.keys.toList());
   }
 
-  void onAddSubcategory() {
-    final text = addSubcategoryController.text.trim();
+  void onAddSubcategory(TextEditingController controller) {
+    final text = controller.text.trim();
     if (itemsBySubcategories.keys.contains(text)) {
       ScaffoldMessenger.of(
         context,
@@ -122,7 +121,7 @@ class _CategoryPageState extends State<CategoryPage> {
     } else if (text.isNotEmpty) {
       setState(() {
         itemsBySubcategories[text] = [];
-        addSubcategoryController.clear();
+        controller.clear();
       });
       addSubcategoryWithItems(text, []);
     }
@@ -220,32 +219,22 @@ class _CategoryPageState extends State<CategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final addSubcategorySegment = Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: addSubcategoryController,
-            decoration: InputDecoration(hintText: 'Add subcategory'),
-            onSubmitted: (_) => onAddSubcategory(),
-          ),
-        ),
-        IconButton(onPressed: onAddSubcategory, icon: Icon(Icons.add)),
-      ],
-    );
-
     return Scaffold(
       appBar: AppBar(title: Text('$categoryId list')),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: ListView(
           children: [
-            addSubcategorySegment,
+            AddCategoryRow(onAdd: onAddSubcategory),
             ...itemsBySubcategories.entries.map((subcategoryEntry) {
               final subcategoryKey = subcategoryEntry.key;
               addItemsControllerBySubcategory[subcategoryKey] =
                   TextEditingController();
               return ExpansionTile(
-                title: Text(subcategoryKey, style: TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(
+                  subcategoryKey,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
