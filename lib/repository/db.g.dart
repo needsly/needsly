@@ -338,9 +338,9 @@ class ResolvedItemsCompanion extends UpdateCompanion<ResolvedItem> {
   }
 }
 
-abstract class _$AppDatabase extends GeneratedDatabase {
-  _$AppDatabase(QueryExecutor e) : super(e);
-  $AppDatabaseManager get managers => $AppDatabaseManager(this);
+abstract class _$DatabaseRepository extends GeneratedDatabase {
+  _$DatabaseRepository(QueryExecutor e) : super(e);
+  $DatabaseRepositoryManager get managers => $DatabaseRepositoryManager(this);
   late final $ResolvedItemsTable resolvedItems = $ResolvedItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
@@ -367,7 +367,7 @@ typedef $$ResolvedItemsTableUpdateCompanionBuilder =
     });
 
 class $$ResolvedItemsTableFilterComposer
-    extends Composer<_$AppDatabase, $ResolvedItemsTable> {
+    extends Composer<_$DatabaseRepository, $ResolvedItemsTable> {
   $$ResolvedItemsTableFilterComposer({
     required super.$db,
     required super.$table,
@@ -397,7 +397,7 @@ class $$ResolvedItemsTableFilterComposer
 }
 
 class $$ResolvedItemsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ResolvedItemsTable> {
+    extends Composer<_$DatabaseRepository, $ResolvedItemsTable> {
   $$ResolvedItemsTableOrderingComposer({
     required super.$db,
     required super.$table,
@@ -427,7 +427,7 @@ class $$ResolvedItemsTableOrderingComposer
 }
 
 class $$ResolvedItemsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ResolvedItemsTable> {
+    extends Composer<_$DatabaseRepository, $ResolvedItemsTable> {
   $$ResolvedItemsTableAnnotationComposer({
     required super.$db,
     required super.$table,
@@ -455,7 +455,7 @@ class $$ResolvedItemsTableAnnotationComposer
 class $$ResolvedItemsTableTableManager
     extends
         RootTableManager<
-          _$AppDatabase,
+          _$DatabaseRepository,
           $ResolvedItemsTable,
           ResolvedItem,
           $$ResolvedItemsTableFilterComposer,
@@ -465,13 +465,19 @@ class $$ResolvedItemsTableTableManager
           $$ResolvedItemsTableUpdateCompanionBuilder,
           (
             ResolvedItem,
-            BaseReferences<_$AppDatabase, $ResolvedItemsTable, ResolvedItem>,
+            BaseReferences<
+              _$DatabaseRepository,
+              $ResolvedItemsTable,
+              ResolvedItem
+            >,
           ),
           ResolvedItem,
           PrefetchHooks Function()
         > {
-  $$ResolvedItemsTableTableManager(_$AppDatabase db, $ResolvedItemsTable table)
-    : super(
+  $$ResolvedItemsTableTableManager(
+    _$DatabaseRepository db,
+    $ResolvedItemsTable table,
+  ) : super(
         TableManagerState(
           db: db,
           table: table,
@@ -519,7 +525,7 @@ class $$ResolvedItemsTableTableManager
 
 typedef $$ResolvedItemsTableProcessedTableManager =
     ProcessedTableManager<
-      _$AppDatabase,
+      _$DatabaseRepository,
       $ResolvedItemsTable,
       ResolvedItem,
       $$ResolvedItemsTableFilterComposer,
@@ -529,15 +535,15 @@ typedef $$ResolvedItemsTableProcessedTableManager =
       $$ResolvedItemsTableUpdateCompanionBuilder,
       (
         ResolvedItem,
-        BaseReferences<_$AppDatabase, $ResolvedItemsTable, ResolvedItem>,
+        BaseReferences<_$DatabaseRepository, $ResolvedItemsTable, ResolvedItem>,
       ),
       ResolvedItem,
       PrefetchHooks Function()
     >;
 
-class $AppDatabaseManager {
-  final _$AppDatabase _db;
-  $AppDatabaseManager(this._db);
+class $DatabaseRepositoryManager {
+  final _$DatabaseRepository _db;
+  $DatabaseRepositoryManager(this._db);
   $$ResolvedItemsTableTableManager get resolvedItems =>
       $$ResolvedItemsTableTableManager(_db, _db.resolvedItems);
 }

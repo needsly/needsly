@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:needsly/components/add_row.dart';
 import 'package:needsly/components/category_row_buttons.dart';
 import 'package:needsly/repository/db.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:needsly/repository/prefs.dart';
 
 class CategoryPage extends StatefulWidget {
   final String category;
@@ -10,59 +10,21 @@ class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key, required this.category});
 
   @override
-  State<StatefulWidget> createState() =>
-      CategoryPageState(category: category);
+  State<StatefulWidget> createState() => CategoryPageState(category: category);
 }
 
 class CategoryPageState extends State<CategoryPage> {
   final String category;
   final Map<String, List<String>> itemsBySubcategories = {};
-  final prefsFuture = SharedPreferences.getInstance();
   final Map<String, TextEditingController> addItemsControllerBySubcategory = {};
-  final db = AppDatabase();
+  final dbRepo = DatabaseRepository();
+  final prefsRepo = SharedPreferencesRepository();
 
   CategoryPageState({required this.category});
 
-  Future<List<String>> loadSubcategories() async {
-    final prefs = await prefsFuture;
-    return prefs.getStringList('needsly.$category') ?? [];
-  }
-
-  void updateSubcategories(List<String> subcategories) async {
-    final prefs = await prefsFuture;
-    await prefs.setStringList('needsly.$category', subcategories);
-  }
-
-  void removeSubcategory(String subcategory) async {
-    final prefs = await prefsFuture;
-    await prefs.remove('needsly.$category.$subcategory');
-    final subcategories = prefs.getStringList('needsly.$category') ?? [];
-    subcategories.remove(subcategory);
-    updateSubcategories(subcategories);
-  }
-
-  void addSubcategoryWithItems(String subcategory, List<String> items) async {
-    final prefs = await prefsFuture;
-    final subcategories = prefs.getStringList('needsly.$category') ?? [];
-    await prefs.setStringList('needsly.$category.$subcategory', items);
-    updateSubcategories([...subcategories, subcategory]);
-  }
-
   void renameSubcategory(String fromSubcategory, String toSubcategory) async {
-    final items = itemsBySubcategories[fromSubcategory];
-
-    addSubcategoryWithItems(toSubcategory, items ?? []);
-    removeSubcategory(fromSubcategory);
-  }
-
-  Future<List<String>> loadItems(String subcategory) async {
-    final prefs = await prefsFuture;
-    return prefs.getStringList('needsly.$category.$subcategory') ?? [];
-  }
-
-  Future<void> saveItems(String subcategory, List<String> items) async {
-    final prefs = await prefsFuture;
-    await prefs.setStringList('needsly.$category.$subcategory', items);
+    final items = itemsBySubcategories[fromSubcategory] ?? [];
+    prefsRepo.renameSubcategory(category, fromSubcategory, toSubcategory, items);
   }
 
   void onRenameSubcategory(String subcategory, String toSubcategory) {
@@ -78,22 +40,22 @@ class CategoryPageState extends State<CategoryPage> {
     setState(() {
       itemsBySubcategories.remove(subcategory);
     });
-    updateSubcategories(itemsBySubcategories.keys.toList());
+    prefsRepo.updateSubcategories(category, itemsBySubcategories.keys.toList());
   }
 
   void onAddSubcategory(TextEditingController controller) {
-    final text = controller.text.trim();
-    if (itemsBySubcategories.keys.contains(text)) {
+    final newCategory = controller.text.trim();
+    if (itemsBySubcategories.keys.contains(newCategory)) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Subcategory already exists!')));
       return;
-    } else if (text.isNotEmpty) {
+    } else if (newCategory.isNotEmpty) {
       setState(() {
-        itemsBySubcategories[text] = [];
+        itemsBySubcategories[newCategory] = [];
         controller.clear();
       });
-      addSubcategoryWithItems(text, []);
+      prefsRepo.addSubcategoryWithItems(category, newCategory, []);
     }
   }
 
@@ -112,7 +74,7 @@ class CategoryPageState extends State<CategoryPage> {
         itemsBySubcategories[subcategory] = updatedItems;
         controller?.clear();
       });
-      saveItems(subcategory, updatedItems);
+      prefsRepo.saveItems(category, subcategory, updatedItems);
     }
   }
 
@@ -147,7 +109,7 @@ class CategoryPageState extends State<CategoryPage> {
                   itemsBySubcategories[subcategory] = items;
                   renameController.clear();
                 });
-                saveItems(subcategory, items);
+                prefsRepo.saveItems(category, subcategory, items);
                 Navigator.of(context).pop();
               },
               child: Text('Rename'),
@@ -165,21 +127,21 @@ class CategoryPageState extends State<CategoryPage> {
     setState(() {
       itemsBySubcategories[subcategory] = items;
     });
-    saveItems(subcategory, items);
+    prefsRepo.saveItems(category, subcategory, items);
   }
 
   void onResolveItem(subcategory, itemIdx) {
     final item = itemsBySubcategories[subcategory]![itemIdx];
-    db.addResolved(category, subcategory, item, DateTime.now());
+    dbRepo.addResolved(category, subcategory, item, DateTime.now());
     onRemoveItem(subcategory, itemIdx);
   }
 
   @override
   void initState() {
     super.initState();
-    loadSubcategories().then((subcategories) {
+    prefsRepo.loadSubcategories(category).then((subcategories) {
       for (var subcategory in subcategories) {
-        loadItems(subcategory).then((items) {
+        prefsRepo.loadItems(category, subcategory).then((items) {
           setState(() {
             itemsBySubcategories[subcategory] = items;
           });

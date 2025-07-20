@@ -13,8 +13,8 @@ class ResolvedItems extends Table {
 }
 
 @DriftDatabase(tables: [ResolvedItems])
-class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(openConnection());
+class DatabaseRepository extends _$DatabaseRepository {
+  DatabaseRepository() : super(openConnection());
 
   @override
   int get schemaVersion => 1;

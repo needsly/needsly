@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/components/add_row.dart';
 import 'package:needsly/components/category_row_buttons.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:needsly/repository/prefs.dart';
 
 import 'subcategories.dart';
 
@@ -14,59 +14,49 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage> {
   final List<String> _defaultCategories = ['Shopping', 'Travel', 'Hobby'];
-  final List<String> _categories = [];
-  final prefsFuture = SharedPreferences.getInstance();
+  final List<String> categories = [];
+  final prefsRepo = SharedPreferencesRepository();
 
   final TextEditingController addCustomCategoryController =
       TextEditingController();
 
-  Future<List<String>> loadCategories() async {
-    final prefs = await prefsFuture;
-    return prefs.getStringList('needsly.categories') ?? [];
-  }
-
-  Future<void> saveCategories(List<String> items) async {
-    final prefs = await prefsFuture;
-    await prefs.setStringList('needsly.categories', items);
-  }
-
   void onAddCategory(TextEditingController controller) {
     final text = controller.text.trim();
-    if (_categories.contains(text)) {
+    if (categories.contains(text)) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Option already exists!')));
       return;
     } else if (text.isNotEmpty) {
       setState(() {
-        _categories.add(text);
+        categories.add(text);
         controller.clear();
       });
-      saveCategories(_categories);
+      prefsRepo.saveCategories(categories);
     }
   }
 
   void onRemoveCategory(int index) {
     setState(() {
-      _categories.removeAt(index);
+      categories.removeAt(index);
     });
-    saveCategories(_categories);
+    prefsRepo.saveCategories(categories);
   }
 
   void onRenameCategory(int index, String toCategory) {
     setState(() {
-      _categories[index] = toCategory;
+      categories[index] = toCategory;
     });
-    saveCategories(_categories);
+    prefsRepo.saveCategories(categories);
   }
 
   @override
   void initState() {
     super.initState();
     // Load categories from shared preferences
-    loadCategories().then((value) {
+    prefsRepo.loadCategories().then((value) {
       setState(() {
-        _categories.addAll(value.isNotEmpty ? value : _defaultCategories);
+        categories.addAll(value.isNotEmpty ? value : _defaultCategories);
       });
     });
   }
@@ -85,22 +75,22 @@ class _CategoriesPageState extends State<CategoriesPage> {
             // Display list
             Expanded(
               child: ListView.builder(
-                itemCount: _categories.length,
+                itemCount: categories.length,
                 itemBuilder: (_, index) => ListTile(
-                  title: Text(_categories[index]),
+                  title: Text(categories[index]),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return CategoryPage(category: _categories[index]);
+                          return CategoryPage(category: categories[index]);
                         },
                       ),
                     );
                   },
                   trailing: CategoryRowButtons(
                     context: context,
-                    category: _categories[index],
+                    category: categories[index],
                     index: index,
                     onRename: onRenameCategory,
                     onRemove: onRemoveCategory,
