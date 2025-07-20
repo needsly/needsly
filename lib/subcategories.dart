@@ -1,48 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/components/add_row.dart';
 import 'package:needsly/components/category_row_buttons.dart';
+import 'package:needsly/repository/db.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CategoryPage extends StatefulWidget {
-  final String categoryId;
+  final String category;
 
-  const CategoryPage({super.key, required this.categoryId});
+  const CategoryPage({super.key, required this.category});
 
   @override
   State<StatefulWidget> createState() =>
-      CategoryPageState(categoryId: categoryId);
+      CategoryPageState(category: category);
 }
 
 class CategoryPageState extends State<CategoryPage> {
-  final String categoryId;
+  final String category;
   final Map<String, List<String>> itemsBySubcategories = {};
   final prefsFuture = SharedPreferences.getInstance();
   final Map<String, TextEditingController> addItemsControllerBySubcategory = {};
+  final db = AppDatabase();
 
-  CategoryPageState({required this.categoryId});
+  CategoryPageState({required this.category});
 
   Future<List<String>> loadSubcategories() async {
     final prefs = await prefsFuture;
-    return prefs.getStringList('needsly.$categoryId') ?? [];
+    return prefs.getStringList('needsly.$category') ?? [];
   }
 
   void updateSubcategories(List<String> subcategories) async {
     final prefs = await prefsFuture;
-    await prefs.setStringList('needsly.$categoryId', subcategories);
+    await prefs.setStringList('needsly.$category', subcategories);
   }
 
   void removeSubcategory(String subcategory) async {
     final prefs = await prefsFuture;
-    await prefs.remove('needsly.$categoryId.$subcategory');
-    final subcategories = prefs.getStringList('needsly.$categoryId') ?? [];
+    await prefs.remove('needsly.$category.$subcategory');
+    final subcategories = prefs.getStringList('needsly.$category') ?? [];
     subcategories.remove(subcategory);
     updateSubcategories(subcategories);
   }
 
   void addSubcategoryWithItems(String subcategory, List<String> items) async {
     final prefs = await prefsFuture;
-    final subcategories = prefs.getStringList('needsly.$categoryId') ?? [];
-    await prefs.setStringList('needsly.$categoryId.$subcategory', items);
+    final subcategories = prefs.getStringList('needsly.$category') ?? [];
+    await prefs.setStringList('needsly.$category.$subcategory', items);
     updateSubcategories([...subcategories, subcategory]);
   }
 
@@ -53,14 +55,14 @@ class CategoryPageState extends State<CategoryPage> {
     removeSubcategory(fromSubcategory);
   }
 
-  Future<List<String>> loadItems(String subcategoryId) async {
+  Future<List<String>> loadItems(String subcategory) async {
     final prefs = await prefsFuture;
-    return prefs.getStringList('needsly.$categoryId.$subcategoryId') ?? [];
+    return prefs.getStringList('needsly.$category.$subcategory') ?? [];
   }
 
-  Future<void> saveItems(String subcategoryId, List<String> items) async {
+  Future<void> saveItems(String subcategory, List<String> items) async {
     final prefs = await prefsFuture;
-    await prefs.setStringList('needsly.$categoryId.$subcategoryId', items);
+    await prefs.setStringList('needsly.$category.$subcategory', items);
   }
 
   void onRenameSubcategory(String subcategory, String toSubcategory) {
@@ -167,8 +169,9 @@ class CategoryPageState extends State<CategoryPage> {
   }
 
   void onResolveItem(subcategory, itemIdx) {
+    final item = itemsBySubcategories[subcategory]![itemIdx];
+    db.addResolved(category, subcategory, item, DateTime.now());
     onRemoveItem(subcategory, itemIdx);
-    // TODO: besides, add a record about resolving fact => separate table (drift)
   }
 
   @override
@@ -188,7 +191,7 @@ class CategoryPageState extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('$categoryId list')),
+      appBar: AppBar(title: Text('$category list')),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: ListView(
