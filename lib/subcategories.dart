@@ -22,18 +22,13 @@ class CategoryPageState extends State<CategoryPage> {
 
   CategoryPageState({required this.category});
 
-  void renameSubcategory(String fromSubcategory, String toSubcategory) async {
-    final items = itemsBySubcategories[fromSubcategory] ?? [];
-    prefsRepo.renameSubcategory(category, fromSubcategory, toSubcategory, items);
-  }
-
-  void onRenameSubcategory(String subcategory, String toSubcategory) {
-    final items = itemsBySubcategories[subcategory];
+  void onRenameSubcategory(String fromSubcategory, String toSubcategory) {
+    final items = itemsBySubcategories[fromSubcategory];
     setState(() {
-      itemsBySubcategories.remove(subcategory);
+      itemsBySubcategories.remove(fromSubcategory);
       itemsBySubcategories[toSubcategory] = items ?? [];
     });
-    renameSubcategory(subcategory, toSubcategory);
+    prefsRepo.renameSubcategory(category, fromSubcategory, toSubcategory, items ?? []);
   }
 
   void onRemoveSubcategory(subcategory) {
