@@ -19,7 +19,12 @@ class DatabaseRepository extends _$DatabaseRepository {
   @override
   int get schemaVersion => 1;
 
-  Future<int> addResolved(String category, String subcategory, String item, DateTime resolvedAt) {
+  Future<int> addResolved(
+    String category,
+    String subcategory,
+    String item,
+    DateTime resolvedAt,
+  ) {
     return into(resolvedItems).insert(
       ResolvedItemsCompanion.insert(
         category: category,
@@ -32,11 +37,37 @@ class DatabaseRepository extends _$DatabaseRepository {
 
   Future<List<ResolvedItem>> getAllResolved() => select(resolvedItems).get();
 
-  // Future<Map<String, Map<String, List<ResolvedItem>>> getResolvedByCategories() => select(
-  //   resolvedItems.map((item) => {
-      
-  //   })
-  //   ).get();
+  Future<List<ItemRepetition>> getTopItemsPerPeriod({
+    required int limit,
+    required DateTime from,
+    required DateTime to,
+    required String category,
+    required String subcategory,
+  }) async {
+    final countExpr = resolvedItems.item.count();
+    final result =
+        (selectOnly(resolvedItems)
+              ..addColumns([resolvedItems.item, countExpr])
+              ..where(resolvedItems.category.equals(category))
+              ..where(resolvedItems.subcategory.equals(subcategory))
+              ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
+              ..groupBy([resolvedItems.item]))
+            .get();
+    final finalResult = result.then((r) {
+      return r.map((row) {
+        return ItemRepetition(
+          category: category,
+          subcategory: subcategory,
+          item: row.read(resolvedItems.item)!,
+          from: from,
+          to: to,
+          count: row.read(countExpr)!,
+        );
+      }).toList();
+    });
+    return finalResult;
+    // TODO
+  }
 }
 
 LazyDatabase openConnection() {
@@ -44,5 +75,23 @@ LazyDatabase openConnection() {
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'app.sqlite'));
     return NativeDatabase.createInBackground(file);
+  });
+}
+
+class ItemRepetition {
+  final String category;
+  final String subcategory;
+  final String item;
+  final DateTime from;
+  final DateTime to;
+  final int count;
+
+  ItemRepetition({
+    required this.category,
+    required this.subcategory,
+    required this.item,
+    required this.from,
+    required this.to,
+    required this.count,
   });
 }
