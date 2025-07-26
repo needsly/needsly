@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/categories.dart';
-import 'package:needsly/stats.dart';
+import 'package:needsly/views/categories.dart';
+import 'package:needsly/views/stats.dart';
 
 void main() => runApp(NeedslyApp());
 
