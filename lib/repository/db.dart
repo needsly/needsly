@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:needsly/dto/dto.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 part 'db.g.dart';
@@ -75,23 +76,5 @@ LazyDatabase openConnection() {
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'app.sqlite'));
     return NativeDatabase.createInBackground(file);
-  });
-}
-
-class ItemRepetition {
-  final String category;
-  final String subcategory;
-  final String item;
-  final DateTime from;
-  final DateTime to;
-  final int count;
-
-  ItemRepetition({
-    required this.category,
-    required this.subcategory,
-    required this.item,
-    required this.from,
-    required this.to,
-    required this.count,
   });
 }
