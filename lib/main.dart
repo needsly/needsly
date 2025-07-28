@@ -8,18 +8,18 @@ class NeedslyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: BottomTabsPage());
+    return MaterialApp(home: NeedslyAppPage());
   }
 }
 
-class BottomTabsPage extends StatefulWidget {
-  const BottomTabsPage({super.key});
+class NeedslyAppPage extends StatefulWidget {
+  const NeedslyAppPage({super.key});
 
   @override
-  BottomTabsPageState createState() => BottomTabsPageState();
+  NeedslyAppPageState createState() => NeedslyAppPageState();
 }
 
-class BottomTabsPageState extends State<BottomTabsPage> {
+class NeedslyAppPageState extends State<NeedslyAppPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: Center(child: CategoriesPage()));
