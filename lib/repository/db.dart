@@ -43,17 +43,16 @@ class DatabaseRepository extends _$DatabaseRepository {
     required DateTime from,
     required DateTime to,
     required String category,
-    required String subcategory,
+    String? subcategory,
   }) async {
     final countExpr = resolvedItems.item.count();
-    final result =
-        (selectOnly(resolvedItems)
-              ..addColumns([resolvedItems.item, countExpr])
-              ..where(resolvedItems.category.equals(category))
-              ..where(resolvedItems.subcategory.equals(subcategory))
-              ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
-              ..groupBy([resolvedItems.item]))
-            .get();
+    final result = getTopItemsPerPeriodQuery(
+      countExpr,
+      category,
+      subcategory,
+      from,
+      to,
+    ).get();
     final finalResult = result.then((r) {
       return r.map((row) {
         return ItemRepetition(
@@ -67,7 +66,30 @@ class DatabaseRepository extends _$DatabaseRepository {
       }).toList();
     });
     return finalResult;
-    // TODO
+  }
+
+  JoinedSelectStatement<$ResolvedItemsTable, ResolvedItem>
+  getTopItemsPerPeriodQuery(
+    Expression<int> countExpr,
+    String category,
+    String? subcategory,
+    DateTime from,
+    DateTime to,
+  ) {
+    if (subcategory == null) {
+      return (selectOnly(resolvedItems)
+        ..addColumns([resolvedItems.item, countExpr])
+        ..where(resolvedItems.category.equals(category))
+        ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
+        ..groupBy([resolvedItems.item]));
+    } else {
+      return (selectOnly(resolvedItems)
+        ..addColumns([resolvedItems.item, countExpr])
+        ..where(resolvedItems.category.equals(category))
+        ..where(resolvedItems.subcategory.equals(subcategory))
+        ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
+        ..groupBy([resolvedItems.item]));
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/components/add_row.dart';
-import 'package:needsly/components/category_row_buttons.dart';
+import 'package:needsly/components/lists/add_row.dart';
+import 'package:needsly/components/lists/category_row_buttons.dart';
 import 'package:needsly/repository/db.dart';
 import 'package:needsly/repository/prefs.dart';
 
@@ -28,7 +28,12 @@ class CategoryPageState extends State<CategoryPage> {
       itemsBySubcategories.remove(fromSubcategory);
       itemsBySubcategories[toSubcategory] = items ?? [];
     });
-    prefsRepo.renameSubcategory(category, fromSubcategory, toSubcategory, items ?? []);
+    prefsRepo.renameSubcategory(
+      category,
+      fromSubcategory,
+      toSubcategory,
+      items ?? [],
+    );
   }
 
   void onRemoveSubcategory(subcategory) {
@@ -127,7 +132,11 @@ class CategoryPageState extends State<CategoryPage> {
 
   void onResolveItem(subcategory, itemIdx) {
     final item = itemsBySubcategories[subcategory]![itemIdx];
-    dbRepo.addResolved(category, subcategory, item, DateTime.now());
+    final resolvedAt = DateTime.now();
+    print(
+      '### Add resolved: category=$category subcategory=$subcategory item=$item resolvedAt=$resolvedAt',
+    );
+    dbRepo.addResolved(category, subcategory, item, resolvedAt);
     onRemoveItem(subcategory, itemIdx);
   }
 
@@ -163,8 +172,9 @@ class CategoryPageState extends State<CategoryPage> {
                   subcategoryKey,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                trailing: ModifySubcategoryRow(
+                trailing: SubcategoryRowButtons(
                   context: context,
+                  category: category,
                   subcategory: subcategoryKey,
                   onRename: onRenameSubcategory,
                   onRemove: onRemoveSubcategory,

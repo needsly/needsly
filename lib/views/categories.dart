@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/components/add_row.dart';
-import 'package:needsly/components/category_row_buttons.dart';
+import 'package:needsly/components/lists/add_row.dart';
+import 'package:needsly/components/lists/category_row_buttons.dart';
 import 'package:needsly/repository/prefs.dart';
 
 import 'subcategories.dart';
@@ -64,7 +64,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Categories')),
+      appBar: AppBar(title: Text('Lists')),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -72,7 +72,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
             SizedBox(height: 12),
             AddCategoryRow(onAdd: onAddCategory),
             SizedBox(height: 16),
-            // Display list
             Expanded(
               child: ListView.builder(
                 itemCount: categories.length,

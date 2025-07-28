@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:needsly/views/stats.dart';
 
-class ModifySubcategoryRow extends StatelessWidget {
-  ModifySubcategoryRow({
+class SubcategoryRowButtons extends StatelessWidget {
+  SubcategoryRowButtons({
     super.key,
     required this.context,
+    required this.category,
     required this.subcategory,
     required this.onRename,
     required this.onRemove,
   });
 
+  final String category;
   final String subcategory;
   final BuildContext context;
   final void Function(String, String) onRename;
@@ -63,6 +66,22 @@ class ModifySubcategoryRow extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.delete),
           onPressed: () => onRemove(subcategory),
+        ),
+        IconButton(
+          icon: Icon(Icons.auto_graph),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return StatsPage(
+                    category: category,
+                    subcategory: subcategory,
+                  );
+                },
+              ),
+            );
+          },
         ),
       ],
     );
@@ -129,6 +148,19 @@ class CategoryRowButtons extends StatelessWidget {
           onPressed: () => withRenameCategoryDialogue(),
         ),
         IconButton(icon: Icon(Icons.delete), onPressed: () => onRemove(index)),
+        IconButton(
+          icon: Icon(Icons.auto_graph),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return StatsPage(category: category);
+                },
+              ),
+            );
+          },
+        ),
       ],
     );
   }

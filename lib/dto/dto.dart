@@ -1,6 +1,6 @@
 class ItemRepetition {
   final String category;
-  final String subcategory;
+  final String? subcategory;
   final String item;
   final DateTime from;
   final DateTime to;

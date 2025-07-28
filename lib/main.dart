@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/views/categories.dart';
-import 'package:needsly/views/stats.dart';
 
 void main() => runApp(NeedslyApp());
 
@@ -21,32 +20,8 @@ class BottomTabsPage extends StatefulWidget {
 }
 
 class BottomTabsPageState extends State<BottomTabsPage> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _pages = [
-    Center(child: CategoriesPage()),
-    Center(child: StatsPage()),
-  ];
-
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onTabTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Categories'),
-          BottomNavigationBarItem(icon: Icon(Icons.auto_graph), label: 'Stats')
-        ]
-      ),
-    );
+    return Scaffold(body: Center(child: CategoriesPage()));
   }
 }
