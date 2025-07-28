@@ -15,3 +15,19 @@ class ItemRepetition {
     required this.count,
   });
 }
+
+class SubcategoryRepetition {
+  final String category;
+  final String subcategory;
+  final DateTime from;
+  final DateTime to;
+  final int count;
+
+  SubcategoryRepetition({
+    required this.category,
+    required this.subcategory,
+    required this.from,
+    required this.to,
+    required this.count,
+  });
+}

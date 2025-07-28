@@ -36,9 +36,35 @@ class DatabaseRepository extends _$DatabaseRepository {
     );
   }
 
-  Future<List<ResolvedItem>> getAllResolved() => select(resolvedItems).get();
+  Future<List<SubcategoryRepetition>> getTopSubcategories({
+    required int limit,
+    required DateTime from,
+    required DateTime to,
+    required String category,
+  }) async {
+    final countExpr = resolvedItems.subcategory.count();
+    final result =
+        (selectOnly(resolvedItems)
+              ..addColumns([resolvedItems.subcategory, countExpr])
+              ..where(resolvedItems.category.equals(category))
+              ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
+              ..groupBy([resolvedItems.subcategory]))
+            .get();
+    final finalResult = result.then((r) {
+      return r.map((row) {
+        return SubcategoryRepetition(
+          category: category,
+          subcategory: row.read(resolvedItems.subcategory)!,
+          from: from,
+          to: to,
+          count: row.read(countExpr)!,
+        );
+      }).toList();
+    });
+    return finalResult;
+  }
 
-  Future<List<ItemRepetition>> getTopItemsPerPeriod({
+  Future<List<ItemRepetition>> getTopItems({
     required int limit,
     required DateTime from,
     required DateTime to,
@@ -52,6 +78,7 @@ class DatabaseRepository extends _$DatabaseRepository {
       subcategory,
       from,
       to,
+      limit,
     ).get();
     final finalResult = result.then((r) {
       return r.map((row) {
@@ -75,13 +102,15 @@ class DatabaseRepository extends _$DatabaseRepository {
     String? subcategory,
     DateTime from,
     DateTime to,
+    int limit,
   ) {
     if (subcategory == null) {
       return (selectOnly(resolvedItems)
-        ..addColumns([resolvedItems.item, countExpr])
-        ..where(resolvedItems.category.equals(category))
-        ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
-        ..groupBy([resolvedItems.item]));
+          ..addColumns([resolvedItems.item, countExpr])
+          ..where(resolvedItems.category.equals(category))
+          ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
+          ..groupBy([resolvedItems.item]))
+        ..limit(limit);
     } else {
       return (selectOnly(resolvedItems)
         ..addColumns([resolvedItems.item, countExpr])
