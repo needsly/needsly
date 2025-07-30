@@ -27,8 +27,14 @@ class StatsPageState extends State<StatsPage> {
     return Scaffold(
       appBar: AppBar(title: Text(getAppBarTitle())),
       body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: getCharts(),
+        padding: const EdgeInsets.all(5),
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: 5),
+            child: Text('This month'),
+            ),
+          ...getCharts()
+          ],
       ),
     );
   }
@@ -37,7 +43,7 @@ class StatsPageState extends State<StatsPage> {
     if (subcategory != null) {
       return [topItemsPieChart()];
     } else {
-      return [topItemsPieChart(), topSubcategoriessPieChart()]; 
+      return [topItemsPieChart(), topSubcategoriessPieChart()];
     }
   }
 
@@ -51,8 +57,8 @@ class StatsPageState extends State<StatsPage> {
 
   Widget topItemsPieChart() {
     return Container(
-      margin: const EdgeInsets.all(12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         color: Colors.blueGrey,
         border: Border.all(color: Colors.grey, width: 2),
@@ -78,11 +84,12 @@ class StatsPageState extends State<StatsPage> {
   }
 
   Widget buildTopItemsPieChart() {
+    final now = DateTime.now();
     return FutureBuilder(
       future: dbRepo.getTopItems(
         limit: 10,
-        from: DateTime.now().subtract(Duration(days: 30)),
-        to: DateTime.now(),
+        from: DateTime(now.year, now.month, 1),
+        to: now,
         category: category,
         subcategory: subcategory,
       ),
@@ -92,7 +99,7 @@ class StatsPageState extends State<StatsPage> {
         }
         final itemRepetitions = snapshot.data!;
         return Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(5),
           child: TopItemsPieChart(itemRepetitions: itemRepetitions),
         );
       },
@@ -101,8 +108,8 @@ class StatsPageState extends State<StatsPage> {
 
   Widget topSubcategoriessPieChart() {
     return Container(
-      margin: const EdgeInsets.all(12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
         color: Colors.blueGrey,
         border: Border.all(color: Colors.grey, width: 2),
@@ -128,11 +135,12 @@ class StatsPageState extends State<StatsPage> {
   }
 
   Widget buildTopSubcategoriesPieChart() {
+    final now = DateTime.now();
     return FutureBuilder(
       future: dbRepo.getTopSubcategories(
         limit: 10,
-        from: DateTime.now().subtract(Duration(days: 30)),
-        to: DateTime.now(),
+        from: DateTime(now.year, now.month, 1),
+        to: now,
         category: category,
       ),
       builder: (ctx, snapshot) {
@@ -141,7 +149,7 @@ class StatsPageState extends State<StatsPage> {
         }
         final subcategoryRepetitions = snapshot.data!;
         return Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(5),
           child: TopSubcategoriesPieChart(
             subcategoryRepetitions: subcategoryRepetitions,
           ),
