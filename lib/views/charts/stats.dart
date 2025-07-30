@@ -76,7 +76,6 @@ class StatsPageState extends State<StatsPage> {
             ),
           ),
           SizedBox(height: 250, child: buildTopItemsChart()),
-          // Text('Show more..', style: TextStyle(color: Colors.white),),
           InkWell(
             onTap: () {
               Navigator.push(
@@ -146,7 +145,25 @@ class StatsPageState extends State<StatsPage> {
             ),
           ),
           SizedBox(height: 250, child: buildTopSubcategoriesChart()),
-          Text('Show more..', style: TextStyle(color: Colors.white)),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      // TODO: replace with a separate view
+                      TopItems(category: category, subcategory: subcategory),
+                ),
+              );
+            },
+            child: const Text(
+              'Show more..',
+              style: TextStyle(
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
         ],
       ),
     );

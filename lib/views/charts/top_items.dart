@@ -39,15 +39,22 @@ class TopItemsState extends State<TopItems> {
         padding: const EdgeInsets.all(5),
         children: [
           // calendar chooser
-          DateRangePickerFormField(
-            onChanged: (range) {
-              if (range != null) {
-                setState(() {
-                  from = range.start;
-                  to = range.end;
-                });
-              }
-            },
+          Container(
+            margin: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey, width: 2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: DateRangePickerFormField(
+              onChanged: (range) {
+                if (range != null) {
+                  setState(() {
+                    from = range.start;
+                    to = range.end;
+                  });
+                }
+              },
+            ),
           ),
           topItemsChart(),
         ],
@@ -64,9 +71,6 @@ class TopItemsState extends State<TopItems> {
         color: Colors.blueGrey,
         border: Border.all(color: Colors.grey, width: 2),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(2, 2)),
-        ],
       ),
       child: Column(
         children: [

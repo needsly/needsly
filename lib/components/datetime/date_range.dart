@@ -49,8 +49,7 @@ class _DateRangePickerFormFieldState extends State<DateRangePickerFormField> {
       onTap: () => _pickDateRange(context),
       child: InputDecorator(
         decoration: const InputDecoration(
-          labelText: 'Date range',
-          border: OutlineInputBorder(),
+          border: OutlineInputBorder()
         ),
         child: Text(text),
       ),
