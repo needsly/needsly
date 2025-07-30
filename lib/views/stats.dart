@@ -41,9 +41,9 @@ class StatsPageState extends State<StatsPage> {
 
   List<Widget> getCharts() {
     if (subcategory != null) {
-      return [topItemsPieChart()];
+      return [topItemsChart()];
     } else {
-      return [topItemsPieChart(), topSubcategoriessPieChart()];
+      return [topItemsChart(), topSubcategoriessChart()];
     }
   }
 
@@ -55,7 +55,7 @@ class StatsPageState extends State<StatsPage> {
     }
   }
 
-  Widget topItemsPieChart() {
+  Widget topItemsChart() {
     return Container(
       margin: const EdgeInsets.all(5),
       padding: const EdgeInsets.all(5),
@@ -77,13 +77,14 @@ class StatsPageState extends State<StatsPage> {
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 250, child: buildTopItemsPieChart()),
+          SizedBox(height: 250, child: buildTopItemsChart()),
+          Text('Show more..', style: TextStyle(color: Colors.white),),
         ],
       ),
     );
   }
 
-  Widget buildTopItemsPieChart() {
+  Widget buildTopItemsChart() {
     final now = DateTime.now();
     return FutureBuilder(
       future: dbRepo.getTopItems(
@@ -100,13 +101,13 @@ class StatsPageState extends State<StatsPage> {
         final itemRepetitions = snapshot.data!;
         return Padding(
           padding: const EdgeInsets.all(5),
-          child: TopItemsPieChart(itemRepetitions: itemRepetitions),
+          child: TopItemsBarChart(itemRepetitions: itemRepetitions),
         );
       },
     );
   }
 
-  Widget topSubcategoriessPieChart() {
+  Widget topSubcategoriessChart() {
     return Container(
       margin: const EdgeInsets.all(5),
       padding: const EdgeInsets.all(5),
@@ -128,13 +129,14 @@ class StatsPageState extends State<StatsPage> {
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 250, child: buildTopSubcategoriesPieChart()),
+          SizedBox(height: 250, child: buildTopSubcategoriesChart()),
+          Text('Show more..', style: TextStyle(color: Colors.white)),
         ],
       ),
     );
   }
 
-  Widget buildTopSubcategoriesPieChart() {
+  Widget buildTopSubcategoriesChart() {
     final now = DateTime.now();
     return FutureBuilder(
       future: dbRepo.getTopSubcategories(

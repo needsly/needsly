@@ -2,10 +2,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:needsly/dto/dto.dart';
 
-class TopItemsPieChart extends StatelessWidget {
+class TopItemsBarChart extends StatelessWidget {
   final List<ItemRepetition> itemRepetitions;
 
-  const TopItemsPieChart({super.key, required this.itemRepetitions});
+  const TopItemsBarChart({super.key, required this.itemRepetitions});
 
   @override
   Widget build(BuildContext context) {
@@ -27,37 +27,6 @@ class TopItemsPieChart extends StatelessWidget {
     }).toList();
 
     final total = itemRepetitions.fold<int>(0, (sum, e) => sum + e.count);
-
-    // return BarChart(
-    //   BarChartData(
-    //     barGroups: barGroups,
-    //     titlesData: FlTitlesData(
-    //       leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-    //       rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-    //       topTitles: AxisTitles(
-    //         sideTitles: SideTitles(
-    //           showTitles: true,
-    //           getTitlesWidget: (value, meta) {
-    //             final index = value.toInt();
-    //             if (index < 0 || index >= itemRepetitions.length) return const SizedBox();
-    //             return SideTitleWidget(
-    //               meta: meta,
-    //               child: RotatedBox(
-    //                 quarterTurns: -1, // rotate label 90° right
-    //                 child: Text(itemRepetitions[index].item),
-    //               ),
-    //             );
-    //           },
-    //         ),
-    //       ),
-    //       bottomTitles: AxisTitles(
-    //         sideTitles: SideTitles(showTitles: true), // counts (numbers)
-    //       ),
-    //     ),
-    //     gridData: FlGridData(show: true),
-    //     borderData: FlBorderData(show: false),
-    //   ),
-    // );
 
     return RotatedBox(
       quarterTurns: 1,
