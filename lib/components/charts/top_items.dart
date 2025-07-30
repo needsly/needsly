@@ -26,8 +26,6 @@ class TopItemsBarChart extends StatelessWidget {
       );
     }).toList();
 
-    final total = itemRepetitions.fold<int>(0, (sum, e) => sum + e.count);
-
     return RotatedBox(
       quarterTurns: 1,
       child: BarChart(
@@ -35,8 +33,8 @@ class TopItemsBarChart extends StatelessWidget {
           alignment: BarChartAlignment.spaceAround,
           maxY:
               (itemRepetitions
-                  .map((e) => e.count)
-                  .reduce((a, b) => a > b ? a : b) *
+                  .map((itemRepetition) => itemRepetition.count)
+                  .reduce((prev, next) => prev > next ? prev : next) *
               1.2),
           barGroups: barGroups,
           titlesData: FlTitlesData(

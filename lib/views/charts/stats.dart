@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:needsly/components/charts/top_items.dart';
 import 'package:needsly/components/charts/top_subcategories.dart';
 import 'package:needsly/repository/db.dart';
+import 'package:needsly/views/charts/top_items.dart';
 
 class StatsPage extends StatefulWidget {
   final String category;
@@ -29,12 +30,9 @@ class StatsPageState extends State<StatsPage> {
       body: ListView(
         padding: const EdgeInsets.all(5),
         children: [
-          Padding(
-            padding: EdgeInsets.only(left: 5),
-            child: Text('This month'),
-            ),
-          ...getCharts()
-          ],
+          Padding(padding: EdgeInsets.only(left: 5), child: Text('This month')),
+          ...getCharts(),
+        ],
       ),
     );
   }
@@ -78,7 +76,25 @@ class StatsPageState extends State<StatsPage> {
             ),
           ),
           SizedBox(height: 250, child: buildTopItemsChart()),
-          Text('Show more..', style: TextStyle(color: Colors.white),),
+          // Text('Show more..', style: TextStyle(color: Colors.white),),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      TopItems(category: category, subcategory: subcategory),
+                ),
+              );
+            },
+            child: const Text(
+              'Show more..',
+              style: TextStyle(
+                color: Colors.blue,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
         ],
       ),
     );

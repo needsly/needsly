@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/views/stats.dart';
+import 'package:needsly/views/charts/stats.dart';
 
 class SubcategoryRowButtons extends StatelessWidget {
   SubcategoryRowButtons({
