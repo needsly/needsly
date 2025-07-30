@@ -3,6 +3,7 @@ import 'package:needsly/components/charts/top_items.dart';
 import 'package:needsly/components/charts/top_subcategories.dart';
 import 'package:needsly/repository/db.dart';
 import 'package:needsly/views/charts/top_items.dart';
+import 'package:needsly/views/charts/top_subcategories.dart';
 
 class StatsPage extends StatefulWidget {
   final String category;
@@ -137,7 +138,7 @@ class StatsPageState extends State<StatsPage> {
       child: Column(
         children: [
           Text(
-            'Top Lists',
+            'Top Subcategories',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -150,9 +151,7 @@ class StatsPageState extends State<StatsPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      // TODO: replace with a separate view
-                      TopItems(category: category, subcategory: subcategory),
+                  builder: (_) => TopSubcategories(category: category),
                 ),
               );
             },

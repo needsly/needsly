@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/components/charts/top_items.dart';
+import 'package:needsly/components/charts/top_subcategories.dart';
 import 'package:needsly/components/datetime/date_range.dart';
 import 'package:needsly/repository/db.dart';
+import 'package:needsly/views/categories.dart';
 
-class TopItems extends StatefulWidget {
+class TopSubcategories extends StatefulWidget {
   final String category;
-  final String? subcategory;
 
-  const TopItems({super.key, required this.category, this.subcategory});
+  const TopSubcategories({super.key, required this.category});
 
   @override
   State<StatefulWidget> createState() =>
-      TopItemsState(category: category, subcategory: subcategory);
+      TopSubcategoriesState(category: category);
 }
 
-class TopItemsState extends State<TopItems> {
+class TopSubcategoriesState extends State<TopSubcategories> {
   final String category;
-  final String? subcategory;
   final DateTime now = DateTime.now();
   DateTime get defaultFrom => DateTime(now.year, now.month, 1);
   DateTime get defaultTo => now;
@@ -25,7 +24,7 @@ class TopItemsState extends State<TopItems> {
 
   final dbRepo = DatabaseRepository();
 
-  TopItemsState({required this.category, this.subcategory}) {
+  TopSubcategoriesState({required this.category}) {
     from = DateTime(now.year, now.month, 1);
     to = now;
   }
@@ -33,7 +32,7 @@ class TopItemsState extends State<TopItems> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(getAppBarTitle())),
+      appBar: AppBar(title: Text('Top subcategories: $category')),
       body: ListView(
         padding: const EdgeInsets.all(5),
         children: [
@@ -55,14 +54,13 @@ class TopItemsState extends State<TopItems> {
               initialValue: DateTimeRange(start: defaultFrom, end: defaultTo),
             ),
           ),
-          topItemsChart(),
+          topSubcategoriesChart(),
         ],
       ),
     );
   }
 
-  // TODO: clean up (duplication)
-  Widget topItemsChart() {
+  Widget topSubcategoriesChart() {
     return Container(
       margin: const EdgeInsets.all(5),
       padding: const EdgeInsets.all(5),
@@ -70,54 +68,50 @@ class TopItemsState extends State<TopItems> {
         color: Colors.blueGrey,
         border: Border.all(color: Colors.grey, width: 2),
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(2, 2)),
+        ],
       ),
       child: Column(
         children: [
           Text(
-            'Top items',
+            'Top Subcategories',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 250, child: buildTopItemsChart()),
+          SizedBox(height: 250, child: buildTopSubcategoriesChart()),
         ],
       ),
     );
   }
 
-  // TODO: clean up (duplication)
-  Widget buildTopItemsChart() {
+  Widget buildTopSubcategoriesChart() {
+    final now = DateTime.now();
     return FutureBuilder(
-      future: dbRepo.getTopItems(
+      future: dbRepo.getTopSubcategories(
         limit: 100,
         from: from,
         to: to,
         category: category,
-        subcategory: subcategory,
       ),
       builder: (ctx, snapshot) {
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
         }
-        final itemRepetitions = snapshot.data;
-        if (snapshot.data!.isNotEmpty) {
+        final subcategoryRepetitions = snapshot.data!;
+        if (subcategoryRepetitions.isNotEmpty) {
           return Padding(
             padding: const EdgeInsets.all(5),
-            child: TopItemsBarChart(itemRepetitions: itemRepetitions!),
+            child: TopSubcategoriesPieChart(
+              subcategoryRepetitions: subcategoryRepetitions,
+            ),
           );
         }
         return Text('No data for the specified time range!');
       },
     );
-  }
-
-  String getAppBarTitle() {
-    if (subcategory != null) {
-      return 'Top items: $category :: $subcategory';
-    } else {
-      return 'Top items: $category';
-    }
   }
 }

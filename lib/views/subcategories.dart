@@ -157,7 +157,7 @@ class CategoryPageState extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('$category list')),
+      appBar: AppBar(title: Text(category)),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: ListView(

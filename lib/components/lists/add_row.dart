@@ -14,7 +14,7 @@ class AddCategoryRow extends StatelessWidget {
         Expanded(
           child: TextField(
             controller: addSubcategoryController,
-            decoration: InputDecoration(hintText: 'Add category'),
+            decoration: InputDecoration(hintText: 'Add list'),
             onSubmitted: (_) => onAdd,
           ),
         ),
