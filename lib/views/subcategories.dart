@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/components/lists/add_row.dart';
-import 'package:needsly/components/lists/category_row_buttons.dart';
+import 'package:needsly/components/rows/add_row.dart';
+import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/repository/db.dart';
 import 'package:needsly/repository/prefs.dart';
 
@@ -180,6 +180,7 @@ class CategoryPageState extends State<CategoryPage> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // TODO: to a separate widget
                           IconButton(
                             icon: Icon(Icons.edit),
                             onPressed: () =>
