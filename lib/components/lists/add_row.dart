@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class AddCategoryRow extends StatelessWidget {
-  AddCategoryRow({super.key, required this.onAdd});
+abstract class AddRow extends StatelessWidget {
+  AddRow({super.key, required this.onAdd});
 
   final TextEditingController addSubcategoryController =
       TextEditingController();
@@ -25,4 +25,12 @@ class AddCategoryRow extends StatelessWidget {
       ],
     );
   }
+}
+
+class AddCategoryRow extends AddRow {
+  AddCategoryRow({required super.onAdd});
+}
+
+class AddSubcategoryRow extends AddRow {
+  AddSubcategoryRow({required super.onAdd});
 }

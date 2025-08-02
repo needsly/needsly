@@ -130,12 +130,9 @@ class CategoryPageState extends State<CategoryPage> {
     prefsRepo.saveItems(category, subcategory, items);
   }
 
-  void onResolveItem(subcategory, itemIdx) {
+  void onResolveItem(String subcategory, int itemIdx) {
     final item = itemsBySubcategories[subcategory]![itemIdx];
     final resolvedAt = DateTime.now();
-    print(
-      '### Add resolved: category=$category subcategory=$subcategory item=$item resolvedAt=$resolvedAt',
-    );
     dbRepo.addResolved(category, subcategory, item, resolvedAt);
     onRemoveItem(subcategory, itemIdx);
   }
@@ -162,7 +159,7 @@ class CategoryPageState extends State<CategoryPage> {
         padding: EdgeInsets.all(16),
         child: ListView(
           children: [
-            AddCategoryRow(onAdd: onAddSubcategory),
+            AddSubcategoryRow(onAdd: onAddSubcategory),
             ...itemsBySubcategories.entries.map((subcategoryEntry) {
               final subcategoryKey = subcategoryEntry.key;
               addItemsControllerBySubcategory[subcategoryKey] =
