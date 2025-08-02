@@ -34,3 +34,32 @@ class AddCategoryRow extends AddRow {
 class AddSubcategoryRow extends AddRow {
   AddSubcategoryRow({required super.onAdd});
 }
+
+class AddItemRow extends StatelessWidget {
+  AddItemRow({super.key, required this.subcategory, required this.onAdd});
+
+  final void Function(String, TextEditingController) onAdd;
+  final String subcategory;
+  final Map<String, TextEditingController> addItemsControllerBySubcategory = {};
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = TextEditingController();
+    addItemsControllerBySubcategory[subcategory] = controller;
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(hintText: 'Add item'),
+            onSubmitted: (_) => onAdd(subcategory, controller),
+          ),
+        ),
+        IconButton(
+          onPressed: () => onAdd(subcategory, controller),
+          icon: Icon(Icons.add),
+        ),
+      ],
+    );
+  }
+}

@@ -16,7 +16,6 @@ class CategoryPage extends StatefulWidget {
 class CategoryPageState extends State<CategoryPage> {
   final String category;
   final Map<String, List<String>> itemsBySubcategories = {};
-  final Map<String, TextEditingController> addItemsControllerBySubcategory = {};
   final dbRepo = DatabaseRepository();
   final prefsRepo = SharedPreferencesRepository();
 
@@ -59,20 +58,19 @@ class CategoryPageState extends State<CategoryPage> {
     }
   }
 
-  void onAddItem(String subcategory) {
-    final controller = addItemsControllerBySubcategory[subcategory];
-    final text = controller?.text.trim();
+  void onAddItem(String subcategory, TextEditingController controller) {
+    final text = controller.text.trim();
     final items = itemsBySubcategories[subcategory] ?? [];
     if (items.contains(text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Item already exists in this subcategory!')),
       );
       return;
-    } else if (text != null && text.isNotEmpty) {
+    } else if (text.isNotEmpty) {
       final updatedItems = [...items, text];
       setState(() {
         itemsBySubcategories[subcategory] = updatedItems;
-        controller?.clear();
+        controller.clear();
       });
       prefsRepo.saveItems(category, subcategory, updatedItems);
     }
@@ -162,8 +160,6 @@ class CategoryPageState extends State<CategoryPage> {
             AddSubcategoryRow(onAdd: onAddSubcategory),
             ...itemsBySubcategories.entries.map((subcategoryEntry) {
               final subcategoryKey = subcategoryEntry.key;
-              addItemsControllerBySubcategory[subcategoryKey] =
-                  TextEditingController();
               return ExpansionTile(
                 title: Text(
                   subcategoryKey,
@@ -203,22 +199,7 @@ class CategoryPageState extends State<CategoryPage> {
                       ),
                     );
                   }),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller:
-                              addItemsControllerBySubcategory[subcategoryKey],
-                          decoration: InputDecoration(hintText: 'Add item'),
-                          onSubmitted: (_) => onAddItem(subcategoryKey),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => onAddItem(subcategoryKey),
-                        icon: Icon(Icons.add),
-                      ),
-                    ],
-                  ),
+                  AddItemRow(subcategory: subcategoryKey, onAdd: onAddItem),
                 ],
               );
             }),

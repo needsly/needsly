@@ -88,7 +88,6 @@ class TopSubcategoriesState extends State<TopSubcategories> {
   }
 
   Widget buildTopSubcategoriesChart() {
-    final now = DateTime.now();
     return FutureBuilder(
       future: dbRepo.getTopSubcategories(
         limit: 100,
