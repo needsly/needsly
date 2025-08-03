@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/category_row_buttons.dart';
+import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/repository/db.dart';
 import 'package:needsly/repository/prefs.dart';
 
@@ -177,26 +178,12 @@ class CategoryPageState extends State<CategoryPage> {
                   ...subcategoryEntry.value.asMap().entries.map((item) {
                     return ListTile(
                       title: Text(item.value),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // TODO: to a separate widget
-                          IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () =>
-                                onRenameItem(subcategoryKey, item.key),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () =>
-                                onRemoveItem(subcategoryKey, item.key),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.done),
-                            onPressed: () =>
-                                onResolveItem(subcategoryKey, item.key),
-                          ),
-                        ],
+                      trailing: ItemRowButtons(
+                        subcategory: subcategoryKey,
+                        itemIdx: item.key,
+                        onRename: onRenameItem,
+                        onRemove: onRemoveItem,
+                        onResolve: onResolveItem,
                       ),
                     );
                   }),

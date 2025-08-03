@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/components/lists/add_row.dart';
-import 'package:needsly/components/lists/category_row_buttons.dart';
+import 'package:needsly/components/rows/add_row.dart';
+import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/repository/prefs.dart';
 
 import 'subcategories.dart';
