@@ -50,6 +50,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
     prefsRepo.saveCategories(categories);
   }
 
+  void onReorder(int oldIdx, int newIdx) {
+    String category = categories[oldIdx];
+    setState(() {
+      categories.removeAt(oldIdx);
+      categories[newIdx] = category;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -73,7 +81,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
             AddCategoryRow(onAdd: onAddCategory),
             SizedBox(height: 16),
             Expanded(
-              child: ListView.builder(
+              child: ReorderableListView.builder(
                 itemCount: categories.length,
                 itemBuilder: (_, index) => ListTile(
                   title: Text(categories[index]),
@@ -95,6 +103,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     onRemove: onRemoveCategory,
                   ),
                 ),
+                onReorder: (oldIdx, newIdx) => onReorder(oldIdx, newIdx),
               ),
             ),
           ],
