@@ -156,6 +156,7 @@ class CategoryPageState extends State<CategoryPage> {
       appBar: AppBar(title: Text(category)),
       body: Padding(
         padding: EdgeInsets.all(16),
+
         child: ListView(
           children: [
             AddSubcategoryRow(onAdd: onAddSubcategory),
@@ -176,6 +177,7 @@ class CategoryPageState extends State<CategoryPage> {
                 childrenPadding: EdgeInsets.all(16),
                 children: [
                   ...subcategoryEntry.value.asMap().entries.map((item) {
+                    // TODO: -> make reordable
                     return ListTile(
                       title: Text(item.value),
                       trailing: ItemRowButtons(

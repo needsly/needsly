@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/repository/prefs.dart';
+import 'package:needsly/utils/utils.dart';
 
 import 'subcategories.dart';
 
@@ -50,12 +51,12 @@ class _CategoriesPageState extends State<CategoriesPage> {
     prefsRepo.saveCategories(categories);
   }
 
-  void onReorder(int oldIdx, int newIdx) {
-    String category = categories[oldIdx];
+  void onReorderCategory(int oldIdx, int newIdx) {
+    final reorderedCategories = reorderList(categories, oldIdx, newIdx);
     setState(() {
-      categories.removeAt(oldIdx);
-      categories[newIdx] = category;
+      categories.setAll(0, reorderedCategories);
     });
+    prefsRepo.saveCategories(reorderedCategories);
   }
 
   @override
@@ -103,7 +104,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     onRemove: onRemoveCategory,
                   ),
                 ),
-                onReorder: (oldIdx, newIdx) => onReorder(oldIdx, newIdx),
+                onReorder: (oldIdx, newIdx) => onReorderCategory(oldIdx, newIdx),
               ),
             ),
           ],
