@@ -1,4 +1,4 @@
-List<String> shiftList(List<String> elements, int oldIdx, int newIdx) {
+List<String> reorderList(List<String> elements, int oldIdx, int newIdx) {
   if (elements.isEmpty) return List.empty();
   if (oldIdx == newIdx) return elements;
   if (oldIdx < 0 || oldIdx >= elements.length || newIdx < 0 || newIdx >= elements.length) {
