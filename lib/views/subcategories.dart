@@ -196,6 +196,7 @@ class CategoryPageState extends State<CategoryPage> {
                         newIdx,
                       ),
                       itemBuilder: (_, index) => ListTile(
+                        key: Key(subcategoryEntry.value[index]),
                         title: Text(subcategoryEntry.value[index]),
                         trailing: ItemRowButtons(
                           subcategory: subcategoryKey,
