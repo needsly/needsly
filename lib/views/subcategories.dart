@@ -4,6 +4,7 @@ import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/repository/db.dart';
 import 'package:needsly/repository/prefs.dart';
+import 'package:needsly/utils/utils.dart';
 
 class CategoryPage extends StatefulWidget {
   final String category;
@@ -136,6 +137,15 @@ class CategoryPageState extends State<CategoryPage> {
     onRemoveItem(subcategory, itemIdx);
   }
 
+  void onReorderSubcategoryItems(String subcategory, int oldIdx, int newIdx) {
+    final items = itemsBySubcategories[subcategory] ?? [];
+    final reorderedItems = reorderList(items, oldIdx, newIdx);
+    setState(() {
+      itemsBySubcategories[subcategory] = reorderedItems;
+    });
+    prefsRepo.saveItems(category, subcategory, reorderedItems);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -178,8 +188,13 @@ class CategoryPageState extends State<CategoryPage> {
                 children: [
                   SizedBox(
                     height: subcategoryEntry.value.length * 60,
-                    child: ListView.builder(
+                    child: ReorderableListView.builder(
                       itemCount: subcategoryEntry.value.length,
+                      onReorder: (oldIdx, newIdx) => onReorderSubcategoryItems(
+                        subcategoryEntry.key,
+                        oldIdx,
+                        newIdx,
+                      ),
                       itemBuilder: (_, index) => ListTile(
                         title: Text(subcategoryEntry.value[index]),
                         trailing: ItemRowButtons(
