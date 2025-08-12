@@ -85,6 +85,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
               child: ReorderableListView.builder(
                 itemCount: categories.length,
                 itemBuilder: (_, index) => ListTile(
+                  key: Key(categories[index]),
                   title: Text(categories[index]),
                   onTap: () {
                     Navigator.push(
