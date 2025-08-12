@@ -176,19 +176,22 @@ class CategoryPageState extends State<CategoryPage> {
                 ),
                 childrenPadding: EdgeInsets.all(16),
                 children: [
-                  ...subcategoryEntry.value.asMap().entries.map((item) {
-                    // TODO: -> make reordable
-                    return ListTile(
-                      title: Text(item.value),
-                      trailing: ItemRowButtons(
-                        subcategory: subcategoryKey,
-                        itemIdx: item.key,
-                        onRename: onRenameItem,
-                        onRemove: onRemoveItem,
-                        onResolve: onResolveItem,
+                  SizedBox(
+                    height: subcategoryEntry.value.length * 60,
+                    child: ListView.builder(
+                      itemCount: subcategoryEntry.value.length,
+                      itemBuilder: (_, index) => ListTile(
+                        title: Text(subcategoryEntry.value[index]),
+                        trailing: ItemRowButtons(
+                          subcategory: subcategoryKey,
+                          itemIdx: index,
+                          onRename: onRenameItem,
+                          onRemove: onRemoveItem,
+                          onResolve: onResolveItem,
+                        ),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
                   AddItemRow(subcategory: subcategoryKey, onAdd: onAddItem),
                 ],
               );
