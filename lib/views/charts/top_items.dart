@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:needsly/components/charts/top_items.dart';
 import 'package:needsly/components/datetime/date_range.dart';
 import 'package:needsly/repository/db.dart';
+import 'package:provider/provider.dart';
 
 class TopItems extends StatefulWidget {
   final String category;
@@ -22,8 +23,6 @@ class TopItemsState extends State<TopItems> {
   DateTime get defaultTo => now;
   late DateTime from;
   late DateTime to;
-
-  final dbRepo = DatabaseRepository();
 
   TopItemsState({required this.category, this.subcategory}) {
     from = DateTime(now.year, now.month, 1);
@@ -89,6 +88,7 @@ class TopItemsState extends State<TopItems> {
 
   // TODO: clean up (duplication)
   Widget buildTopItemsChart() {
+    final dbRepo = Provider.of<DatabaseRepository>(context, listen: false);
     return FutureBuilder(
       future: dbRepo.getTopItems(
         limit: 100,

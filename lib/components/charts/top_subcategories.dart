@@ -9,6 +9,9 @@ class TopSubcategoriesPieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (subcategoryRepetitions.isEmpty) { 
+      return Center(child: Text('No data'),);
+    }
     final total = subcategoryRepetitions.fold<int>(0, (sum, e) => sum + e.count);
 
     return PieChart(

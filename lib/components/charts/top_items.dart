@@ -9,6 +9,9 @@ class TopItemsBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (itemRepetitions.isEmpty) {
+      return Center(child: Text('No data'));
+    }
     final barGroups = itemRepetitions.asMap().entries.map((entry) {
       final index = entry.key;
       final item = entry.value;

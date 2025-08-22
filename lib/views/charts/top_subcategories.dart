@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:needsly/components/charts/top_subcategories.dart';
 import 'package:needsly/components/datetime/date_range.dart';
 import 'package:needsly/repository/db.dart';
+import 'package:provider/provider.dart';
 
 class TopSubcategories extends StatefulWidget {
   final String category;
@@ -20,8 +21,6 @@ class TopSubcategoriesState extends State<TopSubcategories> {
   DateTime get defaultTo => now;
   late DateTime from;
   late DateTime to;
-
-  final dbRepo = DatabaseRepository();
 
   TopSubcategoriesState({required this.category}) {
     from = DateTime(now.year, now.month, 1);
@@ -88,6 +87,7 @@ class TopSubcategoriesState extends State<TopSubcategories> {
   }
 
   Widget buildTopSubcategoriesChart() {
+    final dbRepo = Provider.of<DatabaseRepository>(context, listen: false);
     return FutureBuilder(
       future: dbRepo.getTopSubcategories(
         limit: 100,

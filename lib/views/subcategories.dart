@@ -5,6 +5,7 @@ import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/repository/db.dart';
 import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/utils/utils.dart';
+import 'package:provider/provider.dart';
 
 class CategoryPage extends StatefulWidget {
   final String category;
@@ -18,12 +19,11 @@ class CategoryPage extends StatefulWidget {
 class CategoryPageState extends State<CategoryPage> {
   final String category;
   final Map<String, List<String>> itemsBySubcategories = {};
-  final dbRepo = DatabaseRepository();
-  final prefsRepo = SharedPreferencesRepository();
 
   CategoryPageState({required this.category});
 
   void onRenameSubcategory(String fromSubcategory, String toSubcategory) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     final items = itemsBySubcategories[fromSubcategory];
     setState(() {
       itemsBySubcategories.remove(fromSubcategory);
@@ -38,6 +38,7 @@ class CategoryPageState extends State<CategoryPage> {
   }
 
   void onRemoveSubcategory(subcategory) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     setState(() {
       itemsBySubcategories.remove(subcategory);
     });
@@ -45,6 +46,7 @@ class CategoryPageState extends State<CategoryPage> {
   }
 
   void onAddSubcategory(TextEditingController controller) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     final newCategory = controller.text.trim();
     if (itemsBySubcategories.keys.contains(newCategory)) {
       ScaffoldMessenger.of(
@@ -61,6 +63,7 @@ class CategoryPageState extends State<CategoryPage> {
   }
 
   void onAddItem(String subcategory, TextEditingController controller) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     final text = controller.text.trim();
     final items = itemsBySubcategories[subcategory] ?? [];
     if (items.contains(text)) {
@@ -79,6 +82,7 @@ class CategoryPageState extends State<CategoryPage> {
   }
 
   void onRenameItem(String subcategory, int itemIdx) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     final items = itemsBySubcategories[subcategory];
     if (items == null) return;
     final TextEditingController renameController = TextEditingController(
@@ -121,6 +125,7 @@ class CategoryPageState extends State<CategoryPage> {
   }
 
   void onRemoveItem(String subcategory, int itemIdx) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     final items = itemsBySubcategories[subcategory];
     if (items == null) return;
     items.removeAt(itemIdx);
@@ -133,11 +138,13 @@ class CategoryPageState extends State<CategoryPage> {
   void onResolveItem(String subcategory, int itemIdx) {
     final item = itemsBySubcategories[subcategory]![itemIdx];
     final resolvedAt = DateTime.now();
+    final dbRepo = Provider.of<DatabaseRepository>(context, listen: false);
     dbRepo.addResolved(category, subcategory, item, resolvedAt);
     onRemoveItem(subcategory, itemIdx);
   }
 
   void onReorderSubcategoryItems(String subcategory, int oldIdx, int newIdx) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     final items = itemsBySubcategories[subcategory] ?? [];
     final reorderedItems = reorderList(items, oldIdx, newIdx);
     setState(() {
@@ -149,6 +156,7 @@ class CategoryPageState extends State<CategoryPage> {
   @override
   void initState() {
     super.initState();
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     prefsRepo.loadSubcategories(category).then((subcategories) {
       for (var subcategory in subcategories) {
         prefsRepo.loadItems(category, subcategory).then((items) {

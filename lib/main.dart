@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:needsly/repository/db.dart';
+import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/views/categories.dart';
+import 'package:provider/provider.dart';
 
-void main() => runApp(NeedslyApp());
+void main() => runApp(
+  MultiProvider(
+    providers: [
+      Provider<DatabaseRepository>(create: (_) => DatabaseRepository()),
+      Provider<SharedPreferencesRepository>(
+        create: (_) => SharedPreferencesRepository(),
+      ),
+    ],
+    child: NeedslyApp(),
+  ),
+);
 
 class NeedslyApp extends StatelessWidget {
   const NeedslyApp({super.key});

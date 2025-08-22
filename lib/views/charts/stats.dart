@@ -4,6 +4,7 @@ import 'package:needsly/components/charts/top_subcategories.dart';
 import 'package:needsly/repository/db.dart';
 import 'package:needsly/views/charts/top_items.dart';
 import 'package:needsly/views/charts/top_subcategories.dart';
+import 'package:provider/provider.dart';
 
 class StatsPage extends StatefulWidget {
   final String category;
@@ -17,8 +18,6 @@ class StatsPage extends StatefulWidget {
 }
 
 class StatsPageState extends State<StatsPage> {
-  final dbRepo = DatabaseRepository();
-
   final String category;
   final String? subcategory;
 
@@ -102,6 +101,7 @@ class StatsPageState extends State<StatsPage> {
 
   Widget buildTopItemsChart() {
     final now = DateTime.now();
+    final dbRepo = Provider.of<DatabaseRepository>(context, listen: false);
     return FutureBuilder(
       future: dbRepo.getTopItems(
         limit: 10,
@@ -170,6 +170,7 @@ class StatsPageState extends State<StatsPage> {
 
   Widget buildTopSubcategoriesChart() {
     final now = DateTime.now();
+    final dbRepo = Provider.of<DatabaseRepository>(context, listen: false);
     return FutureBuilder(
       future: dbRepo.getTopSubcategories(
         limit: 10,
