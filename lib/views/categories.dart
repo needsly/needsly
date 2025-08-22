@@ -21,7 +21,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   final TextEditingController addCustomCategoryController =
       TextEditingController();
 
-  void onAddCategory(TextEditingController controller) {
+  void onAddCategory(TextEditingController controller) {  
     final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     final text = controller.text.trim();
     if (categories.contains(text)) {
@@ -38,20 +38,21 @@ class _CategoriesPageState extends State<CategoriesPage> {
     }
   }
 
-  void onRemoveCategory(int index) {
+  void onRemoveCategory(int idx) {
     final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     setState(() {
-      categories.removeAt(index);
+      categories.removeAt(idx);
     });
-    prefsRepo.saveCategories(categories);
+    prefsRepo.removeCategory(idx);
   }
 
-  void onRenameCategory(int index, String toCategory) {
+  void onRenameCategory(int idx, String toCategory) {
     final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
     setState(() {
-      categories[index] = toCategory;
+      categories[idx] = toCategory;
     });
     prefsRepo.saveCategories(categories);
+    prefsRepo.renameCategory(idx, toCategory);
   }
 
   void onReorderCategory(int oldIdx, int newIdx) {
