@@ -7,20 +7,20 @@ import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/utils/utils.dart';
 import 'package:provider/provider.dart';
 
-class CategoryPage extends StatefulWidget {
+class SubcategoriesPage extends StatefulWidget {
   final String category;
 
-  const CategoryPage({super.key, required this.category});
+  const SubcategoriesPage({super.key, required this.category});
 
   @override
-  State<StatefulWidget> createState() => CategoryPageState(category: category);
+  State<StatefulWidget> createState() => SubcategoriesPageState(category: category);
 }
 
-class CategoryPageState extends State<CategoryPage> {
+class SubcategoriesPageState extends State<SubcategoriesPage> {
   final String category;
   final Map<String, List<String>> itemsBySubcategories = {};
 
-  CategoryPageState({required this.category});
+  SubcategoriesPageState({required this.category});
 
   void onRenameSubcategory(String fromSubcategory, String toSubcategory) {
     final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);

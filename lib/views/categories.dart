@@ -98,7 +98,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return CategoryPage(category: categories[index]);
+                          return SubcategoriesPage(category: categories[index]);
                         },
                       ),
                     );
