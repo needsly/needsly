@@ -13,23 +13,30 @@ class SubcategoriesPage extends StatefulWidget {
   const SubcategoriesPage({super.key, required this.category});
 
   @override
-  State<StatefulWidget> createState() => SubcategoriesPageState(category: category);
+  State<StatefulWidget> createState() =>
+      SubcategoriesPageState(category: category);
 }
 
 class SubcategoriesPageState extends State<SubcategoriesPage> {
+  // TODO: move to global constants
+  final _personalCategoriesPrefix = 'needsly.categories';
   final String category;
   final Map<String, List<String>> itemsBySubcategories = {};
 
   SubcategoriesPageState({required this.category});
 
   void onRenameSubcategory(String fromSubcategory, String toSubcategory) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     final items = itemsBySubcategories[fromSubcategory];
     setState(() {
       itemsBySubcategories.remove(fromSubcategory);
       itemsBySubcategories[toSubcategory] = items ?? [];
     });
     prefsRepo.renameSubcategory(
+      _personalCategoriesPrefix,
       category,
       fromSubcategory,
       toSubcategory,
@@ -37,16 +44,26 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
     );
   }
 
-  void onRemoveSubcategory(subcategory) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+  void onRemoveSubcategory(String subcategory) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     setState(() {
       itemsBySubcategories.remove(subcategory);
     });
-    prefsRepo.updateSubcategories(category, itemsBySubcategories.keys.toList());
+    prefsRepo.updateSubcategories(
+      _personalCategoriesPrefix,
+      category,
+      itemsBySubcategories.keys.toList(),
+    );
   }
 
   void onAddSubcategory(TextEditingController controller) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     final newCategory = controller.text.trim();
     if (itemsBySubcategories.keys.contains(newCategory)) {
       ScaffoldMessenger.of(
@@ -58,12 +75,20 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
         itemsBySubcategories[newCategory] = [];
         controller.clear();
       });
-      prefsRepo.addSubcategoryWithItems(category, newCategory, []);
+      prefsRepo.addSubcategoryWithItems(
+        _personalCategoriesPrefix,
+        category,
+        newCategory,
+        [],
+      );
     }
   }
 
   void onAddItem(String subcategory, TextEditingController controller) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     final text = controller.text.trim();
     final items = itemsBySubcategories[subcategory] ?? [];
     if (items.contains(text)) {
@@ -77,12 +102,20 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
         itemsBySubcategories[subcategory] = updatedItems;
         controller.clear();
       });
-      prefsRepo.saveItems(category, subcategory, updatedItems);
+      prefsRepo.saveItems(
+        _personalCategoriesPrefix,
+        category,
+        subcategory,
+        updatedItems,
+      );
     }
   }
 
   void onRenameItem(String subcategory, int itemIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     final items = itemsBySubcategories[subcategory];
     if (items == null) return;
     final TextEditingController renameController = TextEditingController(
@@ -113,7 +146,12 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
                   itemsBySubcategories[subcategory] = items;
                   renameController.clear();
                 });
-                prefsRepo.saveItems(category, subcategory, items);
+                prefsRepo.saveItems(
+                  _personalCategoriesPrefix,
+                  category,
+                  subcategory,
+                  items,
+                );
                 Navigator.of(context).pop();
               },
               child: Text('Rename'),
@@ -125,14 +163,22 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   }
 
   void onRemoveItem(String subcategory, int itemIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     final items = itemsBySubcategories[subcategory];
     if (items == null) return;
     items.removeAt(itemIdx);
     setState(() {
       itemsBySubcategories[subcategory] = items;
     });
-    prefsRepo.saveItems(category, subcategory, items);
+    prefsRepo.saveItems(
+      _personalCategoriesPrefix,
+      category,
+      subcategory,
+      items,
+    );
   }
 
   void onResolveItem(String subcategory, int itemIdx) {
@@ -144,22 +190,37 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   }
 
   void onReorderSubcategoryItems(String subcategory, int oldIdx, int newIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     final items = itemsBySubcategories[subcategory] ?? [];
     final reorderedItems = reorderList(items, oldIdx, newIdx);
     setState(() {
       itemsBySubcategories[subcategory] = reorderedItems;
     });
-    prefsRepo.saveItems(category, subcategory, reorderedItems);
+    prefsRepo.saveItems(
+      _personalCategoriesPrefix,
+      category,
+      subcategory,
+      reorderedItems,
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
-    prefsRepo.loadSubcategories(category).then((subcategories) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
+    prefsRepo.loadSubcategories(_personalCategoriesPrefix, category).then((
+      subcategories,
+    ) {
       for (var subcategory in subcategories) {
-        prefsRepo.loadItems(category, subcategory).then((items) {
+        prefsRepo.loadItems(_personalCategoriesPrefix, category, subcategory).then((
+          items,
+        ) {
           setState(() {
             itemsBySubcategories[subcategory] = items;
           });

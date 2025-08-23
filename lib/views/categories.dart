@@ -11,18 +11,23 @@ class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
 
   @override
-  _CategoriesPageState createState() => _CategoriesPageState();
+  CategoriesPageState createState() => CategoriesPageState();
 }
 
-class _CategoriesPageState extends State<CategoriesPage> {
+class CategoriesPageState extends State<CategoriesPage> {
+  // TODO: move to global constants
+  final _personalCategoriesPrefix = 'needsly.categories';
   final List<String> _defaultCategories = ['Shopping', 'Travel', 'Hobby'];
   final List<String> categories = [];
 
   final TextEditingController addCustomCategoryController =
       TextEditingController();
 
-  void onAddCategory(TextEditingController controller) {  
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+  void onAddCategory(TextEditingController controller) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     final text = controller.text.trim();
     if (categories.contains(text)) {
       ScaffoldMessenger.of(
@@ -34,42 +39,63 @@ class _CategoriesPageState extends State<CategoriesPage> {
         categories.add(text);
         controller.clear();
       });
-      prefsRepo.saveCategories(categories);
+      prefsRepo.saveCategories(_personalCategoriesPrefix, categories);
     }
   }
 
   void onRemoveCategory(int idx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     setState(() {
       categories.removeAt(idx);
     });
-    prefsRepo.removeCategory(idx);
+    prefsRepo.removeCategory(_personalCategoriesPrefix, idx);
   }
 
   void onRenameCategory(int idx, String toCategory) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
+    final fromCategory = categories[idx];
     setState(() {
       categories[idx] = toCategory;
     });
-    prefsRepo.saveCategories(categories);
-    prefsRepo.renameCategory(idx, toCategory);
+    prefsRepo.saveCategories(_personalCategoriesPrefix, categories);
+    prefsRepo.renameCategory(
+      _personalCategoriesPrefix,
+      idx,
+      fromCategory,
+      toCategory,
+    );
   }
 
   void onReorderCategory(int oldIdx, int newIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
     final reorderedCategories = reorderList(categories, oldIdx, newIdx);
     setState(() {
       categories.setAll(0, reorderedCategories);
     });
-    prefsRepo.saveCategories(reorderedCategories);
+    prefsRepo.saveCategories(_personalCategoriesPrefix, reorderedCategories);
   }
 
   @override
   void initState() {
     super.initState();
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(context, listen: false);
-    // Load categories from shared preferences
-    prefsRepo.loadCategories().then((value) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
+    loadCategoriesFromStorage(prefsRepo);
+  }
+
+  void loadCategoriesFromStorage(SharedPreferencesRepository prefsRepo) {
+    prefsRepo.loadCategories(_personalCategoriesPrefix).then((value) {
       setState(() {
         categories.addAll(value.isNotEmpty ? value : _defaultCategories);
       });
