@@ -95,9 +95,9 @@ class CategoriesPageState extends State<CategoriesPage> {
   }
 
   void loadCategoriesFromStorage(SharedPreferencesRepository prefsRepo) {
-    prefsRepo.loadCategories(_personalCategoriesPrefix).then((value) {
+    prefsRepo.loadCategories(_personalCategoriesPrefix).then((cats) {
       setState(() {
-        categories.addAll(value.isNotEmpty ? value : _defaultCategories);
+        categories.addAll(cats.isNotEmpty ? cats : _defaultCategories);
       });
     });
   }

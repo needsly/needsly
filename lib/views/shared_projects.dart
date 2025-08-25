@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:needsly/auth/login.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/repository/prefs.dart';
@@ -91,18 +93,24 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
     loadSharedProjectsFromStorage(prefsRepo);
   }
 
-  void loadSharedProjectsFromStorage(SharedPreferencesRepository prefsRepo) {
-    prefsRepo.loadCategories(_sharedProjectsPrefix).then((value) {
+  void loadSharedProjectsFromStorage(SharedPreferencesRepository prefs) {
+    prefs.loadCategories(_sharedProjectsPrefix).then((projects) {
       setState(() {
-        sharedProjects.addAll(value.isNotEmpty ? value : []);
+        sharedProjects.addAll(projects.isNotEmpty ? projects : []);
       });
+      for (var project in projects) {
+        prefs.loadFirebaseProjectCreds(project).then((creds) {
+          
+        });
+        
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Lists')),
+      appBar: AppBar(title: Text('Shared projects')),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -113,25 +121,26 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
             Expanded(
               child: ReorderableListView.builder(
                 itemCount: sharedProjects.length,
-                itemBuilder: (_, index) => ListTile(
-                  key: Key(sharedProjects[index]),
-                  title: Text(sharedProjects[index]),
+                itemBuilder: (_, idx) => ListTile(
+                  key: Key(sharedProjects[idx]),
+                  title: Text(sharedProjects[idx]),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return SubcategoriesPage(
-                            category: sharedProjects[index],
-                          );
+                          return Center(child: Text(sharedProjects[idx]));
+                          // return SubcategoriesPage(
+                          //   category: sharedProjects[index],
+                          // );
                         },
                       ),
                     );
                   },
                   trailing: CategoryRowButtons(
                     context: context,
-                    category: sharedProjects[index],
-                    index: index,
+                    category: sharedProjects[idx],
+                    index: idx,
                     onRename: onRenameSharedProject,
                     onRemove: onRemoveSharedProject,
                   ),
