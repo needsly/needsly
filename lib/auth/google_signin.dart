@@ -24,20 +24,17 @@ import 'package:provider/provider.dart';
 // }
 
 class GoogleCredentialProvider with ChangeNotifier {
-  String? token;
-  String? idToken;
+  OAuthCredential? credential;
 
-  GoogleCredentialProvider({this.token, this.idToken});
+  GoogleCredentialProvider({this.credential});
 
-  void setValue(String? token, String? idToken) {
-    token = token;
-    idToken = idToken;
+  void setValue(OAuthCredential? credential) {
+    credential = credential;
     notifyListeners();
   }
 }
 
 class GoogleSignInPage extends StatelessWidget {
-
   Future<OAuthCredential> _getCredential(
     GoogleSignInAccount signedInGoogleUser,
   ) async {
@@ -65,38 +62,44 @@ class GoogleSignInPage extends StatelessWidget {
     // );
   }
 
-  Future<OAuthCredential?> _getAlreadySignedInUser(BuildContext ctx) async {
-    // Check whether the user is already logged in via google
-    final googleSignIn = Provider.of<GoogleSignIn>(ctx, listen: false);
-    final previouslySignedInGoogleUser = await googleSignIn.signInSilently();
-    if (previouslySignedInGoogleUser == null) return null;
-    return _getCredential(previouslySignedInGoogleUser);
-  }
+  // Future<OAuthCredential?> _getAlreadySignedInUser(BuildContext ctx) async {
+  //   // Check whether the user is already logged in via google
+  //   final googleSignIn = Provider.of<GoogleSignIn>(ctx, listen: false);
+  //   final previouslySignedInGoogleUser = await googleSignIn.signInSilently();
+  //   if (previouslySignedInGoogleUser == null) return null;
+  //   return _getCredential(previouslySignedInGoogleUser);
+  // }
 
-  Future<void> _trySignIn(BuildContext ctx) async {
+  Future<OAuthCredential?> _trySignIn(BuildContext ctx) async {
     final googleCredential = await _signInWithGoogle(ctx);
     if (googleCredential != null) {
       print(
         "Signed in with credential: accessToken=${googleCredential.accessToken} idToken=${googleCredential.idToken}",
       );
       // Update GoogleCredentialProvider
-      final googleCredentialProvider = Provider.of<GoogleCredentialProvider>(
-        ctx,
-        listen: false,
-      );
-      googleCredentialProvider.setValue(
-        googleCredential.accessToken,
-        googleCredential.idToken,
-      );
+      ctx.read<GoogleCredentialProvider>().setValue(googleCredential);
     }
+    return googleCredential;
   }
 
   Widget _getSignInForm(BuildContext ctx) {
     return Center(
       child: ElevatedButton(
         onPressed: () async {
-          await _trySignIn(ctx);
+          final credential = await _trySignIn(ctx);
           Navigator.pop(ctx);
+          // Navigator.push(
+          //   ctx,
+          //   MaterialPageRoute(
+          //     builder: (_) {
+          //       // return InheritedProvider<GoogleCredentialProvider>(
+          //       //   create: (_) =>
+          //       //       GoogleCredentialProvider(credential: credential),
+          //       //   child: SharedProjectsPage(),
+          //       // );
+          //     },
+          //   ),
+          // );
         },
         child: Text("Sign in with Google"),
       ),
@@ -105,29 +108,32 @@ class GoogleSignInPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final signInForm = _getSignInForm(context);
-    return FutureBuilder(
-      future: _getAlreadySignedInUser(context),
-      builder: (ctx, cred) {
-        if (cred.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (cred.hasData && cred.data!.accessToken != null) {
-          print(
-            "Already signed in with credential: accessToken=${cred.data!.accessToken} idToken=${cred.data!.idToken}",
-          );
-          final googleCredentialProvider =
-              Provider.of<GoogleCredentialProvider>(ctx, listen: false);
-          googleCredentialProvider.setValue(
-            cred.data!.accessToken,
-            cred.data!.idToken,
-          );
-          return SharedProjectsPage();
-        } else {
-          print('not signed in');
-          return signInForm;
-        }
-      },
-    );
+    return _getSignInForm(context);
+
+    // return FutureBuilder(
+    //   future: _getAlreadySignedInUser(context),
+    //   builder: (ctx, cred) {
+    //     if (cred.connectionState == ConnectionState.waiting) {
+    //       return const Center(child: CircularProgressIndicator());
+    //     }
+    //     if (cred.hasData && cred.data!.accessToken != null) {
+    //       print(
+    //         "Already signed in with credential: accessToken=${cred.data!.accessToken} idToken=${cred.data!.idToken}",
+    //       );
+    //       context.read<GoogleCredentialProvider>().setValue(
+    //         cred.data!.accessToken,
+    //         cred.data!.idToken,
+    //       );
+    //       // Navigator.push(
+    //       //   context,
+    //       //   MaterialPageRoute(builder: (_) => SharedProjectsPage()),
+    //       // );
+    //       return Center();
+    //     } else {
+    //       print('not signed in');
+    //       return signInForm;
+    //     }
+    //   },
+    // );
   }
 }
