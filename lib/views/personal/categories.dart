@@ -111,7 +111,7 @@ class CategoriesPageState extends State<CategoriesPage> {
         child: Column(
           children: [
             SizedBox(height: 12),
-            AddCategoryRow(onAdd: onAddCategory),
+            AddListRow(onAdd: onAddCategory, hintText: 'Add category'),
             SizedBox(height: 16),
             Expanded(
               child: ReorderableListView.builder(

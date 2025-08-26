@@ -1,4 +1,4 @@
-package com.example.needsly
+package com.render1980.needsly
 
 import io.flutter.embedding.android.FlutterActivity
 

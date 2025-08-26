@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:needsly/views/shared_projects.dart';
+import 'package:needsly/views/shared/shared_projects.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
@@ -23,8 +23,20 @@ import 'package:provider/provider.dart';
 //   }
 // }
 
-class LoginPage extends StatelessWidget {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
+class GoogleCredentialProvider with ChangeNotifier {
+  String? token;
+  String? idToken;
+
+  GoogleCredentialProvider({this.token, this.idToken});
+
+  void setValue(String? token, String? idToken) {
+    token = token;
+    idToken = idToken;
+    notifyListeners();
+  }
+}
+
+class GoogleSignInPage extends StatelessWidget {
 
   Future<OAuthCredential> _getCredential(
     GoogleSignInAccount signedInGoogleUser,
@@ -36,12 +48,13 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Future<OAuthCredential?> signInWithGoogle() async {
+  Future<OAuthCredential?> _signInWithGoogle(BuildContext ctx) async {
     // // Check whether the user is already logged in via google
     // final previouslySignedInGoogleUser = await _googleSignIn.signInSilently();
     // if (previouslySignedInGoogleUser == null) {
     // Force authentication via google sign-in form
-    final signedInGoogleUser = await _googleSignIn.signIn();
+    final googleSignIn = Provider.of<GoogleSignIn>(ctx, listen: false);
+    final signedInGoogleUser = await googleSignIn.signIn();
     // User canceled auth
     if (signedInGoogleUser == null) return null;
     return _getCredential(signedInGoogleUser);
@@ -52,54 +65,66 @@ class LoginPage extends StatelessWidget {
     // );
   }
 
-  Future<OAuthCredential?> getAlreadySignedInUser() async {
+  Future<OAuthCredential?> _getAlreadySignedInUser(BuildContext ctx) async {
     // Check whether the user is already logged in via google
-    final previouslySignedInGoogleUser = await _googleSignIn.signInSilently();
+    final googleSignIn = Provider.of<GoogleSignIn>(ctx, listen: false);
+    final previouslySignedInGoogleUser = await googleSignIn.signInSilently();
     if (previouslySignedInGoogleUser == null) return null;
     return _getCredential(previouslySignedInGoogleUser);
   }
 
-  Widget getSignInForm(BuildContext ctx) {
-    return ElevatedButton(
-      onPressed: () async {
-        final googleCredential = await signInWithGoogle();
-        if (googleCredential != null) {
-          print(
-            "Signed in with credential: accessToken=${googleCredential.accessToken} idToken=${googleCredential.idToken}",
-          );
-        }
-        Navigator.pop(
-          ctx,
-          Provider<OAuthCredential?>(
-            create: (_) => googleCredential,
-            child: SharedProjectsPage(),
-          ),
-        );
-      },
-      child: Text("Sign in with Google"),
+  Future<void> _trySignIn(BuildContext ctx) async {
+    final googleCredential = await _signInWithGoogle(ctx);
+    if (googleCredential != null) {
+      print(
+        "Signed in with credential: accessToken=${googleCredential.accessToken} idToken=${googleCredential.idToken}",
+      );
+      // Update GoogleCredentialProvider
+      final googleCredentialProvider = Provider.of<GoogleCredentialProvider>(
+        ctx,
+        listen: false,
+      );
+      googleCredentialProvider.setValue(
+        googleCredential.accessToken,
+        googleCredential.idToken,
+      );
+    }
+  }
+
+  Widget _getSignInForm(BuildContext ctx) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: () async {
+          await _trySignIn(ctx);
+          Navigator.pop(ctx);
+        },
+        child: Text("Sign in with Google"),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final signInForm = getSignInForm(context);
+    final signInForm = _getSignInForm(context);
     return FutureBuilder(
-      future: getAlreadySignedInUser(),
+      future: _getAlreadySignedInUser(context),
       builder: (ctx, cred) {
         if (cred.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (cred.hasData &&
-            cred.data!.idToken != null &&
-            cred.data!.accessToken != null) {
+        if (cred.hasData && cred.data!.accessToken != null) {
           print(
             "Already signed in with credential: accessToken=${cred.data!.accessToken} idToken=${cred.data!.idToken}",
           );
-          return Provider<OAuthCredential?>(
-            create: (_) => cred.data,
-            child: SharedProjectsPage(),
+          final googleCredentialProvider =
+              Provider.of<GoogleCredentialProvider>(ctx, listen: false);
+          googleCredentialProvider.setValue(
+            cred.data!.accessToken,
+            cred.data!.idToken,
           );
+          return SharedProjectsPage();
         } else {
+          print('not signed in');
           return signInForm;
         }
       },

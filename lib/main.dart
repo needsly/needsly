@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/auth/login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:needsly/auth/google_signin.dart';
 import 'package:needsly/repository/db.dart';
 import 'package:needsly/repository/prefs.dart';
-import 'package:needsly/views/categories.dart';
-import 'package:needsly/views/shared_projects.dart';
+import 'package:needsly/views/personal/categories.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(
   MultiProvider(
     providers: [
+      Provider<GoogleSignIn>(create: (_) => GoogleSignIn(scopes: ['email'])),
+      Provider<GoogleCredentialProvider>(create: (_) => GoogleCredentialProvider()),
       Provider<DatabaseRepository>(create: (_) => DatabaseRepository()),
       Provider<SharedPreferencesRepository>(
         create: (_) => SharedPreferencesRepository(),
@@ -39,7 +41,7 @@ class NeedslyAppPageState extends State<NeedslyAppPage> {
 
   final List<Widget> _pages = [
     Center(child: CategoriesPage()),
-    Center(child: LoginPage()),
+    Center(child: GoogleSignInPage()),
   ];
 
   void _onItemTapped(int index) {

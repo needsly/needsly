@@ -218,13 +218,13 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
       subcategories,
     ) {
       for (var subcategory in subcategories) {
-        prefsRepo.loadItems(_personalCategoriesPrefix, category, subcategory).then((
-          items,
-        ) {
-          setState(() {
-            itemsBySubcategories[subcategory] = items;
-          });
-        });
+        prefsRepo
+            .loadItems(_personalCategoriesPrefix, category, subcategory)
+            .then((items) {
+              setState(() {
+                itemsBySubcategories[subcategory] = items;
+              });
+            });
       }
     });
   }
@@ -238,7 +238,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
 
         child: ListView(
           children: [
-            AddSubcategoryRow(onAdd: onAddSubcategory),
+            AddListRow(onAdd: onAddSubcategory, hintText: 'Add subcategory'),
             ...itemsBySubcategories.entries.map((subcategoryEntry) {
               final subcategoryKey = subcategoryEntry.key;
               return ExpansionTile(

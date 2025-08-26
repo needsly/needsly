@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/views/charts/stats.dart';
-import 'package:needsly/views/shared_project_settings.dart';
+import 'package:needsly/views/shared/shared_project_settings.dart';
 
 class SharedProjectButtons extends StatelessWidget {
   SharedProjectButtons({

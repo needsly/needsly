@@ -1,10 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:needsly/auth/login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:needsly/auth/google_signin.dart';
 import 'package:needsly/components/rows/add_row.dart';
-import 'package:needsly/components/rows/category_row_buttons.dart';
+import 'package:needsly/components/rows/shared_project_buttons.dart';
 import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/utils/utils.dart';
+import 'package:needsly/views/shared/shared_documents.dart';
+import 'package:needsly/views/shared/shared_project_settings.dart';
 import 'package:provider/provider.dart';
 
 class SharedProjectsPage extends StatefulWidget {
@@ -22,6 +24,17 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
   final TextEditingController addSharedProjectController =
       TextEditingController();
 
+  void showNewProjectSettingsDialog(String projectName) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Dialog.fullscreen(
+          child: SharedProjectSettingsPage(projectName: projectName),
+        );
+      },
+    );
+  }
+
   void onAddSharedProject(TextEditingController controller) {
     final prefs = Provider.of<SharedPreferencesRepository>(
       context,
@@ -32,8 +45,8 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Option already exists!')));
-      return;
     } else if (text.isNotEmpty) {
+      showNewProjectSettingsDialog(text);
       setState(() {
         sharedProjects.add(text);
         controller.clear();
@@ -99,10 +112,7 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
         sharedProjects.addAll(projects.isNotEmpty ? projects : []);
       });
       for (var project in projects) {
-        prefs.loadFirebaseProjectCreds(project).then((creds) {
-          
-        });
-        
+        prefs.loadFirebaseProjectCreds(project).then((creds) {});
       }
     });
   }
@@ -116,7 +126,10 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
         child: Column(
           children: [
             SizedBox(height: 12),
-            AddCategoryRow(onAdd: onAddSharedProject),
+            AddListRow(
+              onAdd: onAddSharedProject,
+              hintText: 'Add shared project',
+            ),
             SizedBox(height: 16),
             Expanded(
               child: ReorderableListView.builder(
@@ -125,21 +138,25 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
                   key: Key(sharedProjects[idx]),
                   title: Text(sharedProjects[idx]),
                   onTap: () {
+                    final googleCredentialProvider =
+                        Provider.of<GoogleCredentialProvider>(context, listen: false);
+                    print(
+                      'GoogleCredentialProvider state: token=${googleCredentialProvider.token} idToken=${googleCredentialProvider.idToken}',
+                    );
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return Center(child: Text(sharedProjects[idx]));
-                          // return SubcategoriesPage(
-                          //   category: sharedProjects[index],
-                          // );
+                          return SharedDocumentsPage(
+                            projectName: sharedProjects[idx],
+                          );
                         },
                       ),
                     );
                   },
-                  trailing: CategoryRowButtons(
+                  trailing: SharedProjectButtons(
                     context: context,
-                    category: sharedProjects[idx],
+                    sharedProject: sharedProjects[idx],
                     index: idx,
                     onRename: onRenameSharedProject,
                     onRemove: onRemoveSharedProject,
@@ -149,9 +166,28 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
                     onReorderSharedProjects(oldIdx, newIdx),
               ),
             ),
+            ElevatedButton(
+              onPressed: () {
+                signOutFromGoogle(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) {
+                      return GoogleSignInPage();
+                    },
+                  ),
+                );
+              },
+              child: Text("Sign out from Google"),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> signOutFromGoogle(BuildContext ctx) async {
+    final googleSignIn = Provider.of<GoogleSignIn>(ctx, listen: false);
+    googleSignIn.signOut().then((acc) => {print('Signed out: $acc')});
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-abstract class AddRow extends StatelessWidget {
-  AddRow({super.key, required this.onAdd});
+class AddListRow extends StatelessWidget {
+  AddListRow({super.key, required this.onAdd, required this.hintText});
 
+  final String hintText;
   final TextEditingController addSubcategoryController =
       TextEditingController();
   final void Function(TextEditingController) onAdd;
@@ -14,7 +15,7 @@ abstract class AddRow extends StatelessWidget {
         Expanded(
           child: TextField(
             controller: addSubcategoryController,
-            decoration: InputDecoration(hintText: 'Add list'),
+            decoration: InputDecoration(hintText: hintText),
             onSubmitted: (_) => onAdd,
           ),
         ),
@@ -25,14 +26,6 @@ abstract class AddRow extends StatelessWidget {
       ],
     );
   }
-}
-
-class AddCategoryRow extends AddRow {
-  AddCategoryRow({required super.onAdd});
-}
-
-class AddSubcategoryRow extends AddRow {
-  AddSubcategoryRow({required super.onAdd});
 }
 
 class AddItemRow extends StatelessWidget {
