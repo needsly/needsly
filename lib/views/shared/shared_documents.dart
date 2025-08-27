@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:needsly/auth/google_signin.dart';
 
 class SharedDocumentsPage extends StatefulWidget {
   final String projectName;
@@ -17,6 +18,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
   @override
   void initState() {
+    // final googleCredentialProvider = context.read<GoogleCredentialProvider>();
     // Check if a connection to the project exists
     // If so - reuse it
     // Otherwise - connect to the project using existing google token

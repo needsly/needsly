@@ -1,9 +1,6 @@
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:needsly/dto/dto.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'connection/connection.dart';
 part 'db.g.dart';
 
 class ResolvedItems extends Table {
@@ -120,12 +117,4 @@ class DatabaseRepository extends _$DatabaseRepository {
         ..groupBy([resolvedItems.item]));
     }
   }
-}
-
-LazyDatabase openConnection() {
-  return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'app.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
 }

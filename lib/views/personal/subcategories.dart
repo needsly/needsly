@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
-import 'package:needsly/repository/db.dart';
+import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/utils/utils.dart';
 import 'package:provider/provider.dart';

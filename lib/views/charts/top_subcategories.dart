@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/components/charts/top_subcategories.dart';
 import 'package:needsly/components/datetime/date_range.dart';
-import 'package:needsly/repository/db.dart';
+import 'package:needsly/db/db.dart';
 import 'package:provider/provider.dart';
 
 class TopSubcategories extends StatefulWidget {

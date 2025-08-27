@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:needsly/auth/google_signin.dart';
-import 'package:needsly/repository/db.dart';
+import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/views/personal/categories.dart';
 import 'package:needsly/views/shared/shared_projects.dart';
