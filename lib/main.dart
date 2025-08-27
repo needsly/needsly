@@ -46,10 +46,6 @@ class NeedslyAppPageState extends State<NeedslyAppPage> {
   final Widget categoriesPage = CategoriesPage();
   final Widget googleSignInPage = GoogleSignInPage();
   final Widget sharedProjectsPage = SharedProjectsPage();
-  // final List<Widget> _pages = [
-  //   Center(child: CategoriesPage()),
-  //   Center(child: GoogleSignInPage()),
-  // ];
 
   Future<OAuthCredential> getGoogleCredential(
     GoogleSignInAccount signedInGoogleUser,
@@ -61,18 +57,18 @@ class NeedslyAppPageState extends State<NeedslyAppPage> {
     );
   }
 
-  Future<OAuthCredential?> getAlreadySignedInCredential(BuildContext context) async {
+  Future<OAuthCredential?> getAlreadySignedInCredential(
+    BuildContext context,
+  ) async {
     final googleSignIn = Provider.of<GoogleSignIn>(context, listen: false);
     final previouslySignedInGoogleUser = await googleSignIn.signInSilently();
     if (previouslySignedInGoogleUser == null) return null;
-
     final alreadySignedInCredential = await getGoogleCredential(
       previouslySignedInGoogleUser,
     );
     print(
       "Already signed in with credential: accessToken=${alreadySignedInCredential.accessToken} idToken=${alreadySignedInCredential.idToken}",
     );
-    context.read<GoogleCredentialProvider>().setValue(alreadySignedInCredential);
     return alreadySignedInCredential;
   }
 
@@ -82,15 +78,10 @@ class NeedslyAppPageState extends State<NeedslyAppPage> {
     });
   }
 
-  Widget _getTargetPage(OAuthCredential? credential, BuildContext ctx) {
-    // Shared projects tab is tapped
+  Widget _getTargetPage(OAuthCredential? credential) {
     if (_selectedIndex == 1) {
+      // Shared projects tab is tapped
       if (credential?.accessToken != null) {
-        // return Change<GoogleCredentialProvider>(
-        //   create: (_) => GoogleCredentialProvider(credential: credential),
-        //   child: SharedProjectsPage(),
-        // );
-        // ctx.read<GoogleCredentialProvider>().setValue(credential);
         return sharedProjectsPage;
       }
       return googleSignInPage;
@@ -98,16 +89,39 @@ class NeedslyAppPageState extends State<NeedslyAppPage> {
     return categoriesPage;
   }
 
+  Future<OAuthCredential?> updateCredential(
+    GoogleCredentialProvider provider,
+    OAuthCredential? credential,
+  ) async {
+    if (credential != null) {
+      provider.setValue(credential);
+    }
+    return credential;
+  }
+
+  Widget getBody(
+    AsyncSnapshot<OAuthCredential?> snapshot,
+    GoogleCredentialProvider googleCredentialProvider,
+  ) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    print(
+      '1 [DEBUG] Context: ${context.hashCode} googleCredentialProvider: ${googleCredentialProvider.hashCode}',
+    );
+    return _getTargetPage(snapshot.data);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final googleCredentialProvider = context.read<GoogleCredentialProvider>();
     return Scaffold(
       body: FutureBuilder(
-        future: getAlreadySignedInCredential(context),
-        builder: (ctx, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return _getTargetPage(snapshot.data, context);
+        future: getAlreadySignedInCredential(context).then((cred) {
+          return updateCredential(googleCredentialProvider, cred);
+        }),
+        builder: (_, snapshot) {
+          return getBody(snapshot, googleCredentialProvider);
         },
       ),
       bottomNavigationBar: BottomNavigationBar(

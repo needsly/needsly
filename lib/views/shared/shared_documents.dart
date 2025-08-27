@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:needsly/auth/google_signin.dart';
-import 'package:provider/provider.dart';
 
 class SharedDocumentsPage extends StatefulWidget {
   final String projectName;

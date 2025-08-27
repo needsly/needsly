@@ -119,7 +119,10 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final googleCredential = context.watch<GoogleCredentialProvider>();
+    final googleCredentialProvider = context.watch<GoogleCredentialProvider>();
+    print(
+      '3 [DEBUG] Context: ${context.hashCode} googleCredentialProvider: ${googleCredentialProvider.hashCode}',
+    );
     // final googleCredential = Provider.of<GoogleCredentialProvider>(context);
     return Scaffold(
       appBar: AppBar(title: Text('Shared projects')),
@@ -141,7 +144,7 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
                   title: Text(sharedProjects[idx]),
                   onTap: () {
                     print(
-                      'GoogleCredentialProvider state: token=${googleCredential.credential?.secret} idToken=${googleCredential.credential?.idToken}',
+                      '3 GoogleCredentialProvider Context: ${context.hashCode} googleCredentialProvider: ${googleCredentialProvider.hashCode} state: token=${googleCredentialProvider.credential?.accessToken} idToken=${googleCredentialProvider.credential?.idToken}',
                     );
                     Navigator.push(
                       context,
