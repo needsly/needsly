@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesRepository {
@@ -156,7 +157,7 @@ class SharedPreferencesRepository {
     );
   }
 
-  Future<FirebaseProjectCreds> loadFirebaseProjectCreds(
+  Future<FirebaseOptions?> loadFirebaseProjectOptions(
     String projectName,
   ) async {
     final prefs = await prefsFuture;
@@ -173,24 +174,29 @@ class SharedPreferencesRepository {
     final senderId = prefs.getString(
       'needsly.firebase.$projectName.credentials.messaging_sender_id',
     );
-    return FirebaseProjectCreds(
-      projectName: projectName,
+    if (apiKey == null ||
+        appId == null ||
+        senderId == null ||
+        projectId == null) {
+      return null;
+    }
+    return FirebaseOptions(
       apiKey: apiKey,
       appId: appId,
-      projectId: projectId,
       messagingSenderId: senderId,
+      projectId: projectId,
     );
   }
 }
 
-class FirebaseProjectCreds {
+class FirebaseProjectOptions {
   final String projectName;
   final String? apiKey;
   final String? appId;
   final String? projectId;
   final String? messagingSenderId;
 
-  const FirebaseProjectCreds({
+  const FirebaseProjectOptions({
     required this.projectName,
     required this.apiKey,
     required this.appId,

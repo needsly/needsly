@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:needsly/auth/google_signin.dart';
+import 'package:needsly/auth/google/google_signin.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/shared_project_buttons.dart';
 import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/utils/utils.dart';
-import 'package:needsly/views/shared/shared_documents.dart';
 import 'package:needsly/views/shared/shared_project_settings.dart';
 import 'package:provider/provider.dart';
 
@@ -112,18 +110,13 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
         sharedProjects.addAll(projects.isNotEmpty ? projects : []);
       });
       for (var project in projects) {
-        prefs.loadFirebaseProjectCreds(project).then((creds) {});
+        prefs.loadFirebaseProjectOptions(project).then((creds) {});
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final googleCredentialProvider = context.watch<GoogleCredentialProvider>();
-    print(
-      '3 [DEBUG] Context: ${context.hashCode} googleCredentialProvider: ${googleCredentialProvider.hashCode}',
-    );
-    // final googleCredential = Provider.of<GoogleCredentialProvider>(context);
     return Scaffold(
       appBar: AppBar(title: Text('Shared projects')),
       body: Padding(
@@ -142,17 +135,12 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
                 itemBuilder: (_, idx) => ListTile(
                   key: Key(sharedProjects[idx]),
                   title: Text(sharedProjects[idx]),
-                  onTap: () {
-                    print(
-                      '3 GoogleCredentialProvider Context: ${context.hashCode} googleCredentialProvider: ${googleCredentialProvider.hashCode} state: token=${googleCredentialProvider.credential?.accessToken} idToken=${googleCredentialProvider.credential?.idToken}',
-                    );
+                  onTap: () async {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) {
-                          return SharedDocumentsPage(
-                            projectName: sharedProjects[idx],
-                          );
+                        builder: (ctx) {
+                          return getGoogleSignInPage(sharedProjects[idx]);
                         },
                       ),
                     );
@@ -169,28 +157,9 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
                     onReorderSharedProjects(oldIdx, newIdx),
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                signOutFromGoogle(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (ctx) {
-                      return GoogleSignInPage();
-                    },
-                  ),
-                );
-              },
-              child: Text("Sign out from Google"),
-            ),
           ],
         ),
       ),
     );
-  }
-
-  Future<void> signOutFromGoogle(BuildContext ctx) async {
-    final googleSignIn = Provider.of<GoogleSignIn>(ctx, listen: false);
-    googleSignIn.signOut().then((acc) => {print('Signed out: $acc')});
   }
 }

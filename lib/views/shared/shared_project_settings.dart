@@ -25,11 +25,11 @@ class _SharedProjectSettingsPageState extends State<SharedProjectSettingsPage> {
       Provider.of<SharedPreferencesRepository>(context, listen: false);
 
   Future<void> initControllers() async {
-    final creds = await prefs.loadFirebaseProjectCreds(projectName);
-    _projectIdController = TextEditingController(text: creds.projectId);
-    _apiKeyController = TextEditingController(text: creds.apiKey);
-    _appIdController = TextEditingController(text: creds.appId);
-    _senderIdController = TextEditingController(text: creds.messagingSenderId);
+    final creds = await prefs.loadFirebaseProjectOptions(projectName);
+    _projectIdController = TextEditingController(text: creds?.projectId);
+    _apiKeyController = TextEditingController(text: creds?.apiKey);
+    _appIdController = TextEditingController(text: creds?.appId);
+    _senderIdController = TextEditingController(text: creds?.messagingSenderId);
   }
 
   @override

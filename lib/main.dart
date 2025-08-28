@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:needsly/auth/google_signin.dart';
 import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/views/personal/categories.dart';
@@ -11,9 +10,15 @@ import 'package:provider/provider.dart';
 void main() => runApp(
   MultiProvider(
     providers: [
-      Provider<GoogleSignIn>(create: (_) => GoogleSignIn(scopes: ['email'])),
-      ChangeNotifierProvider<GoogleCredentialProvider>(
-        create: (_) => GoogleCredentialProvider(),
+      Provider<GoogleSignIn>(
+        create: (_) => GoogleSignIn(
+          scopes: ['email', 'profile'],
+          // clientId:
+          // '65855428233-akgqmb2jsa88umj1qo2i1iinenh25806.apps.googleusercontent.com',
+        ),
+      ),
+      Provider<Map<String, FirebaseApp>>(
+        create: (_) => <String, FirebaseApp>{},
       ),
       Provider<DatabaseRepository>(create: (_) => DatabaseRepository()),
       Provider<SharedPreferencesRepository>(
@@ -43,34 +48,7 @@ class NeedslyAppPage extends StatefulWidget {
 class NeedslyAppPageState extends State<NeedslyAppPage> {
   int _selectedIndex = 0;
 
-  final Widget categoriesPage = CategoriesPage();
-  final Widget googleSignInPage = GoogleSignInPage();
-  final Widget sharedProjectsPage = SharedProjectsPage();
-
-  Future<OAuthCredential> getGoogleCredential(
-    GoogleSignInAccount signedInGoogleUser,
-  ) async {
-    final googleAuth = await signedInGoogleUser.authentication;
-    return GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-  }
-
-  Future<OAuthCredential?> getAlreadySignedInCredential(
-    BuildContext context,
-  ) async {
-    final googleSignIn = Provider.of<GoogleSignIn>(context, listen: false);
-    final previouslySignedInGoogleUser = await googleSignIn.signInSilently();
-    if (previouslySignedInGoogleUser == null) return null;
-    final alreadySignedInCredential = await getGoogleCredential(
-      previouslySignedInGoogleUser,
-    );
-    print(
-      "Already signed in with credential: accessToken=${alreadySignedInCredential.accessToken} idToken=${alreadySignedInCredential.idToken}",
-    );
-    return alreadySignedInCredential;
-  }
+  final _pages = [CategoriesPage(), SharedProjectsPage()];
 
   void _onItemTapped(int index) async {
     setState(() {
@@ -78,52 +56,10 @@ class NeedslyAppPageState extends State<NeedslyAppPage> {
     });
   }
 
-  Widget _getTargetPage(OAuthCredential? credential) {
-    if (_selectedIndex == 1) {
-      // Shared projects tab is tapped
-      if (credential?.accessToken != null) {
-        return sharedProjectsPage;
-      }
-      return googleSignInPage;
-    }
-    return categoriesPage;
-  }
-
-  Future<OAuthCredential?> updateCredential(
-    GoogleCredentialProvider provider,
-    OAuthCredential? credential,
-  ) async {
-    if (credential != null) {
-      provider.setValue(credential);
-    }
-    return credential;
-  }
-
-  Widget getBody(
-    AsyncSnapshot<OAuthCredential?> snapshot,
-    GoogleCredentialProvider googleCredentialProvider,
-  ) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    print(
-      '1 [DEBUG] Context: ${context.hashCode} googleCredentialProvider: ${googleCredentialProvider.hashCode}',
-    );
-    return _getTargetPage(snapshot.data);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final googleCredentialProvider = context.read<GoogleCredentialProvider>();
     return Scaffold(
-      body: FutureBuilder(
-        future: getAlreadySignedInCredential(context).then((cred) {
-          return updateCredential(googleCredentialProvider, cred);
-        }),
-        builder: (_, snapshot) {
-          return getBody(snapshot, googleCredentialProvider);
-        },
-      ),
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,

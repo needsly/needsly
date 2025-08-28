@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreRepository {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  FirebaseFirestore firestore;
+
+  FirestoreRepository({required this.firestore});
 
   void addDocument(String collection, String document) {
     firestore.collection(collection).doc(document).set({
