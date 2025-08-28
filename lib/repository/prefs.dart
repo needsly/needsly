@@ -140,6 +140,7 @@ class SharedPreferencesRepository {
     String appId,
     String projectId,
     String messagingSenderId,
+    String authDomain,
   ) async {
     final prefs = await prefsFuture;
     prefs.setString(
@@ -154,6 +155,10 @@ class SharedPreferencesRepository {
     prefs.setString(
       'needsly.firebase.$projectName.credentials.messaging_sender_id',
       messagingSenderId,
+    );
+    prefs.setString(
+      'needsly.firebase.$projectName.credentials.auth_domain',
+      authDomain,
     );
   }
 
@@ -174,10 +179,14 @@ class SharedPreferencesRepository {
     final senderId = prefs.getString(
       'needsly.firebase.$projectName.credentials.messaging_sender_id',
     );
+    final authDomain = prefs.getString(
+      'needsly.firebase.$projectName.credentials.auth_domain',
+    );
     if (apiKey == null ||
         appId == null ||
         senderId == null ||
-        projectId == null) {
+        projectId == null ||
+        authDomain == null) {
       return null;
     }
     return FirebaseOptions(
@@ -185,22 +194,7 @@ class SharedPreferencesRepository {
       appId: appId,
       messagingSenderId: senderId,
       projectId: projectId,
+      authDomain: authDomain,
     );
   }
-}
-
-class FirebaseProjectOptions {
-  final String projectName;
-  final String? apiKey;
-  final String? appId;
-  final String? projectId;
-  final String? messagingSenderId;
-
-  const FirebaseProjectOptions({
-    required this.projectName,
-    required this.apiKey,
-    required this.appId,
-    required this.projectId,
-    required this.messagingSenderId,
-  });
 }

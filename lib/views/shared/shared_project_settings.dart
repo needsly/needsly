@@ -18,6 +18,7 @@ class _SharedProjectSettingsPageState extends State<SharedProjectSettingsPage> {
   late TextEditingController _appIdController;
   late TextEditingController _senderIdController;
   late TextEditingController _projectIdController;
+  late TextEditingController _authDomainController;
 
   _SharedProjectSettingsPageState({required this.projectName});
 
@@ -30,6 +31,7 @@ class _SharedProjectSettingsPageState extends State<SharedProjectSettingsPage> {
     _apiKeyController = TextEditingController(text: creds?.apiKey);
     _appIdController = TextEditingController(text: creds?.appId);
     _senderIdController = TextEditingController(text: creds?.messagingSenderId);
+    _authDomainController = TextEditingController(text: creds?.authDomain);
   }
 
   @override
@@ -38,6 +40,7 @@ class _SharedProjectSettingsPageState extends State<SharedProjectSettingsPage> {
     _apiKeyController.dispose();
     _appIdController.dispose();
     _senderIdController.dispose();
+    _authDomainController.dispose();
     super.dispose();
   }
 
@@ -46,11 +49,13 @@ class _SharedProjectSettingsPageState extends State<SharedProjectSettingsPage> {
     String apiKey,
     String appId,
     String messagingSenderId,
+    String authDomain,
   ) {
     if (projectId.isEmpty ||
         apiKey.isEmpty ||
         appId.isEmpty ||
-        messagingSenderId.isEmpty) {
+        messagingSenderId.isEmpty ||
+        authDomain.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -68,13 +73,15 @@ class _SharedProjectSettingsPageState extends State<SharedProjectSettingsPage> {
     final apiKey = _apiKeyController.text.trim();
     final appId = _appIdController.text.trim();
     final messagingSenderId = _senderIdController.text.trim();
-    if (_validate(projectId, apiKey, appId, messagingSenderId)) {
+    final authDomain = _authDomainController.text.trim();
+    if (_validate(projectId, apiKey, appId, messagingSenderId, authDomain)) {
       prefs.updateFirebaseProjectCreds(
         projectName,
         apiKey,
         appId,
         projectId,
         messagingSenderId,
+        authDomain,
       );
       return true;
     }
@@ -133,6 +140,10 @@ class _SharedProjectSettingsPageState extends State<SharedProjectSettingsPage> {
                 decoration: const InputDecoration(
                   labelText: "Messaging Sender ID",
                 ),
+              ),
+              TextField(
+                controller: _authDomainController,
+                decoration: const InputDecoration(labelText: "Auth domain"),
               ),
               const Spacer(),
               saveButton(),
