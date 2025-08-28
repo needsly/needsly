@@ -27,43 +27,45 @@ class GoogleSignInPage extends StatelessWidget {
   Widget _signInForm(BuildContext context) {
     final prefs = Provider.of<SharedPreferencesRepository>(context);
     final projectToApp = Provider.of<Map<String, FirebaseApp>>(context);
-    return ElevatedButton(
-      onPressed: () async {
-        final firebaseProjectOptions = await prefs.loadFirebaseProjectOptions(
-          projectName,
-        );
-        final firebaseApp = await Firebase.initializeApp(
-          name: projectName,
-          options: firebaseProjectOptions,
-        );
-        final firebaseAuth = FirebaseAuth.instanceFor(app: firebaseApp);
-
-        final googleCredential = await _signInWithGoogle(firebaseAuth);
-        if (googleCredential != null) {
-          print(
-            "Signed in with credential: accessToken=${googleCredential.accessToken} idToken=${googleCredential.idToken}",
+    return Center(
+      child: ElevatedButton(
+        onPressed: () async {
+          final firebaseProjectOptions = await prefs.loadFirebaseProjectOptions(
+            projectName,
           );
-          // TODO: catch
-          await firebaseAuth.signInWithCredential(googleCredential);
-          projectToApp[projectName] = firebaseApp;
-        }
-        if (!context.mounted) return;
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (ctx) {
-              return SharedDocumentsPage(
-                projectName: projectName,
-                auth: firebaseAuth,
-                firestoreRepository: FirestoreRepository(
-                  firestore: FirebaseFirestore.instanceFor(app: firebaseApp),
-                ),
-              );
-            },
-          ),
-        );
-      },
-      child: Text("Sign in with Google"),
+          final firebaseApp = await Firebase.initializeApp(
+            name: projectName,
+            options: firebaseProjectOptions,
+          );
+          final firebaseAuth = FirebaseAuth.instanceFor(app: firebaseApp);
+
+          final googleCredential = await _signInWithGoogle(firebaseAuth);
+          if (googleCredential != null) {
+            print(
+              "Signed in with credential: accessToken=${googleCredential.accessToken} token=${googleCredential.token}",
+            );
+            // TODO: catch
+            await firebaseAuth.signInWithCredential(googleCredential);
+            projectToApp[projectName] = firebaseApp;
+          }
+          if (!context.mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (ctx) {
+                return SharedDocumentsPage(
+                  projectName: projectName,
+                  auth: firebaseAuth,
+                  firestoreRepository: FirestoreRepository(
+                    firestore: FirebaseFirestore.instanceFor(app: firebaseApp),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+        child: Text("Sign in with Google"),
+      ),
     );
   }
 
