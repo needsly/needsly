@@ -65,8 +65,8 @@ class NeedslyAppPageState extends State<NeedslyAppPage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Personal'),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Shared'),
         ],
       ),
     );
