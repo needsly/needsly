@@ -242,6 +242,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
             ...itemsBySubcategories.entries.map((subcategoryEntry) {
               final subcategoryKey = subcategoryEntry.key;
               return ExpansionTile(
+                initiallyExpanded: true,
                 title: Text(
                   subcategoryKey,
                   style: TextStyle(fontWeight: FontWeight.bold),
