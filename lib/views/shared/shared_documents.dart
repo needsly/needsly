@@ -42,7 +42,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     // Merge based on alg described in /docs/sync.md
     // Update [local prefs]
     // Update [firestore]
-    print('[init] Project ${projectName} docs');
+    print('[init] Project $projectName docs');
     firestoreRepository.listDocuments("active");
   }
 

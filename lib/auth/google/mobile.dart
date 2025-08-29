@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:needsly/auth/google/credential_provider.dart';
 import 'package:needsly/repository/firestore.dart';
 import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/views/shared/shared_documents.dart';
