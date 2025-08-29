@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -195,6 +196,25 @@ class SharedPreferencesRepository {
       messagingSenderId: senderId,
       projectId: projectId,
       authDomain: authDomain,
+    );
+  }
+
+  Future<int> loadLatestSnapshotVersion(String projectName) async {
+    final prefs = await prefsFuture;
+    final latestSnapshotVersion = prefs.getInt(
+      'needsly.firebase.$projectName.snapshot.version',
+    );
+    return latestSnapshotVersion ?? Timestamp.now().seconds;
+  }
+
+  Future<void> updateLatestSnapshotVersion(
+    String projectName,
+    int latestVersion,
+  ) async {
+    final prefs = await prefsFuture;
+    prefs.setInt(
+      'needsly.firebase.$projectName.snapshot.version',
+      latestVersion,
     );
   }
 }
