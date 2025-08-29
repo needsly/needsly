@@ -35,11 +35,15 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
   @override
   void initState() {
-    // final googleCredentialProvider = context.read<GoogleCredentialProvider>();
-    // Check if a connection to the project exists
-    // If so - reuse it
-    // Otherwise - connect to the project using existing google token
-    // In case of connection issues - alert
+    // Load docs (~subcategories) and items [from local prefs]
+    // Load snapshot version [from local prefs]
+    // Load docs and items for `active` collection [from firestore]
+    // Load metadata -> snapshot -> version field [from firestore] - last server snapshot version)
+    // Merge based on alg described in /docs/sync.md
+    // Update [local prefs]
+    // Update [firestore]
+    print('[init] Project ${projectName} docs');
+    firestoreRepository.listDocuments("active");
   }
 
   @override
