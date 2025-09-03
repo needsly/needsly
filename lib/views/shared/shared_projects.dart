@@ -64,24 +64,6 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
     prefs.removeCategory(_sharedProjectsPrefix, idx);
   }
 
-  void onRenameSharedProject(int idx, String toProjectName) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
-      context,
-      listen: false,
-    );
-    final fromProjectName = sharedProjects[idx];
-    setState(() {
-      sharedProjects[idx] = toProjectName;
-    });
-    prefsRepo.saveCategories(_sharedProjectsPrefix, sharedProjects);
-    prefsRepo.renameCategory(
-      _sharedProjectsPrefix,
-      idx,
-      fromProjectName,
-      toProjectName,
-    );
-  }
-
   void onReorderSharedProjects(int oldIdx, int newIdx) {
     final prefsRepo = Provider.of<SharedPreferencesRepository>(
       context,
@@ -149,7 +131,6 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
                     context: context,
                     sharedProject: sharedProjects[idx],
                     index: idx,
-                    onRename: onRenameSharedProject,
                     onRemove: onRemoveSharedProject,
                   ),
                 ),
