@@ -1,27 +1,60 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:needsly/utils/utils.dart';
 
 class FirestoreRepository {
   FirebaseFirestore firestore;
 
   FirestoreRepository({required this.firestore});
 
-  void listDocuments(String collection) async {
-    final res = firestore.collection(collection).get().then((snapshot) {
-      for (var doc in snapshot.docs) {
-        print("${doc.id} => ${doc.data()}");
-      }
-    });
-    return await res;
+  Future<int> getLatestVersion(String collection, String document) async {
+    final versionDynamic = await firestore
+        .collection(collection)
+        .doc(document)
+        .get()
+        .then((snapshot) {
+          return snapshot.data()?.values.last;
+        });
+
+    final int? version = int.tryParse(versionDynamic);
+    if (version.runtimeType != int) {
+      throw Exception('`version` field has invalid type!');
+    }
+    return version!;
   }
 
-  Future<dynamic> listItems(String collection, String document) async {
+  Future<List<String>> listDocuments(String collection) async {
+    final docNames = await firestore.collection(collection).get().then((
+      snapshot,
+    ) {
+      return snapshot.docs.map((docSnapshot) => docSnapshot.id);
+    });
+    return docNames.toList();
+  }
+
+  Future<Map<String, List<String>>> listItemsByDocuments(
+    String collection,
+  ) async {
+    final itemsByDocuments = await firestore.collection(collection).get().then((
+      snapshot,
+    ) {
+      final docSnapshots = snapshot.docs;
+      return docSnapshots.fold<Map<String, List<String>>>({}, (prev, next) {
+        final docName = next.id;
+        final docItemsDynamic = next.get('items');
+        final items = toStringList(docItemsDynamic);
+        prev[docName] = items;
+        return prev;
+      });
+    });
+    return itemsByDocuments;
+  }
+
+  Future<List<dynamic>> listItems(String collection, String document) async {
     final res = firestore.collection(collection).doc(document).get().then((
       snapshot,
     ) {
       final items = snapshot.data()?.values ?? [];
-      for (var i in items) {
-        print("$i");
-      }
+      return items.toList();
     });
     return res;
   }

@@ -51,6 +51,24 @@ class SharedPreferencesRepository {
     return prefs.getStringList('$prefix.$category') ?? [];
   }
 
+  Future<Map<String, List<String>>> loadItemsBySubcategories(
+    String prefix,
+    String category,
+  ) async {
+    final prefs = await prefsFuture;
+    final subcategories = prefs.getStringList('$prefix.$category') ?? [];
+
+    final itemsBySubcategories = subcategories.fold<Map<String, List<String>>>(
+      {},
+      (prev, next) {
+        final items = prefs.getStringList('$prefix.$category.$next') ?? [];
+        prev[next] = items;
+        return prev;
+      },
+    );
+    return itemsBySubcategories;
+  }
+
   void updateSubcategories(
     String prefix,
     String category,
