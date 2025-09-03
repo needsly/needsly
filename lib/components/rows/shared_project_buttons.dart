@@ -9,21 +9,19 @@ class SharedProjectButtons extends StatelessWidget {
     required this.context,
     required this.sharedProject,
     required this.index,
-    required this.onRename,
     required this.onRemove,
   });
 
   final String sharedProject;
   final int index;
   final BuildContext context;
-  final void Function(int, String) onRename;
   final void Function(int) onRemove;
 
   CategoryRowButtons get categoryRowButtons => CategoryRowButtons(
     context: context,
     category: sharedProject,
     index: index,
-    onRename: onRename,
+    onRename: (int _, String _) => {},
     onRemove: onRemove,
   );
 
@@ -32,10 +30,6 @@ class SharedProjectButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          icon: Icon(Icons.edit),
-          onPressed: () => categoryRowButtons.withRenameCategoryDialogue(),
-        ),
         IconButton(icon: Icon(Icons.delete), onPressed: () => onRemove(index)),
         IconButton(
           icon: Icon(Icons.auto_graph),
