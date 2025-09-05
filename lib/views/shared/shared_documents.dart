@@ -1,6 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:needsly/components/rows/add_row.dart';
+import 'package:needsly/components/rows/category_row_buttons.dart';
+import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/repository/firestore.dart';
+import 'package:needsly/repository/prefs.dart';
+import 'package:needsly/utils/utils.dart';
+import 'package:provider/provider.dart';
 
 class SharedDocumentsPage extends StatefulWidget {
   final String projectName;
@@ -23,9 +30,13 @@ class SharedDocumentsPage extends StatefulWidget {
 }
 
 class SharedDocumentsPageState extends State<SharedDocumentsPage> {
+  final _sharedProjectsPrefix = 'needsly.firebase.projects';
+
   final String projectName;
   final FirebaseAuth auth;
   final FirestoreRepository firestoreRepository;
+
+  final Map<String, List<String>> itemsByDocuments = {};
 
   SharedDocumentsPageState({
     required this.projectName,
@@ -33,32 +44,278 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     required this.firestoreRepository,
   });
 
-  @override
-  void initState() {
-    // Load docs (~subcategories) and items [from local prefs]
-    // Load snapshot version [from local prefs]
-    // Load docs and items for `active` collection [from firestore]
-    // Load metadata -> snapshot -> version field [from firestore] - last server snapshot version)
-    // Merge based on alg described in /docs/sync.md
-    // Update [local prefs]
-    // Update [firestore]
-    print('[init] Project $projectName docs');
-    firestoreRepository.listDocuments("active");
+  void onReorderDocumentItems(String subcategory, int oldIdx, int newIdx) {
+    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+      context,
+      listen: false,
+    );
+    final items = itemsByDocuments[subcategory] ?? [];
+    final reorderedItems = reorderList(items, oldIdx, newIdx);
+    setState(() {
+      itemsByDocuments[subcategory] = reorderedItems;
+    });
+    prefsRepo.saveItems(
+      _sharedProjectsPrefix,
+      projectName,
+      subcategory,
+      reorderedItems,
+    );
   }
+
+  void onAddDocument(TextEditingController controller) {
+    final newDocument = controller.text.trim();
+    if (itemsByDocuments.keys.contains(newDocument)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Subcategory already exists!')));
+      return;
+    } else if (newDocument.isNotEmpty) {
+      setState(() {
+        itemsByDocuments[newDocument] = [];
+        controller.clear();
+      });
+      firestoreRepository.addDocument('active', newDocument);
+      // todo: save to prefs as well??
+      // prefsRepo.addSubcategoryWithItems(
+      //   _sharedProjectsPrefix,
+      //   projectName,
+      //   newDocument,
+      //   [],
+      // );
+    }
+  }
+
+  void onRenameDocument(String fromDocument, String toDocument) async {
+    final items = itemsByDocuments[fromDocument];
+    setState(() {
+      itemsByDocuments.remove(fromDocument);
+      itemsByDocuments[toDocument] = items ?? [];
+    });
+    firestoreRepository.renameDocument('active', fromDocument, toDocument);
+    // todo: save to prefs??
+  }
+
+  void onRemoveDocument(String document) {
+    setState(() {
+      itemsByDocuments.remove(document);
+    });
+    firestoreRepository.deleteDocument('active', document);
+  }
+
+  void onAddItem(String document, TextEditingController controller) {
+    final text = controller.text.trim();
+    final items = itemsByDocuments[document] ?? [];
+    if (items.contains(text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Item already exists in this subcategory!')),
+      );
+      return;
+    } else if (text.isNotEmpty) {
+      final updatedItems = [...items, text];
+      setState(() {
+        itemsByDocuments[document] = updatedItems;
+        controller.clear();
+      });
+      firestoreRepository.addItem('active', document, text);
+      // prefsRepo.saveItems(
+      //   _personalCategoriesPrefix,
+      //   category,
+      //   subcategory,
+      //   updatedItems,
+      // );
+    }
+  }
+
+  void onRenameItem(String document, int itemIdx) {
+    final items = itemsByDocuments[document];
+    if (items == null) return;
+    final TextEditingController renameController = TextEditingController(
+      text: items[itemIdx],
+    );
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Rename Item'),
+          content: TextField(
+            controller: renameController,
+            decoration: InputDecoration(hintText: 'Enter new name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final itemNewName = renameController.text.trim();
+                final removedValue = items.removeAt(itemIdx);
+                items.add(itemNewName);
+                setState(() {
+                  itemsByDocuments[document] = items;
+                  renameController.clear();
+                });
+                // prefsRepo.saveItems(
+                //   _personalCategoriesPrefix,
+                //   category,
+                //   subcategory,
+                //   items,
+                // );
+                firestoreRepository.renameItem(
+                  'active',
+                  document,
+                  removedValue,
+                  itemNewName,
+                );
+                Navigator.of(context).pop();
+              },
+              child: Text('Rename'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void onRemoveItem(String document, int itemIdx) {
+    final items = itemsByDocuments[document];
+    if (items == null) return;
+    final removedValue = items.removeAt(itemIdx);
+    setState(() {
+      itemsByDocuments[document] = items;
+    });
+    firestoreRepository.removeItem('active', document, removedValue);
+    // prefsRepo.saveItems(
+    //   _personalCategoriesPrefix,
+    //   category,
+    //   subcategory,
+    //   items,
+    // );
+  }
+
+  void onResolveItem(String document, int itemIdx) {}
 
   @override
   Widget build(BuildContext context) {
+    final activeCollectionRef = firestoreRepository.getCollection('active');
+    return StreamBuilder<QuerySnapshot>(
+      stream: activeCollectionRef.snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: Text("No data"));
+        }
+
+        final snap = snapshot.data!;
+
+        print('snap metadata: ${snap.metadata}');
+
+        if (snapshot.connectionState == ConnectionState.active &&
+            snap.metadata.isFromCache == false &&
+            itemsByDocuments.isEmpty) {
+          initWithRemoteFirstSnapshot(snap);
+        } else {
+          updateWithRemoteLaterSnapshot(snap);
+        }
+
+        return render(context);
+      },
+    );
+  }
+
+  void initWithRemoteFirstSnapshot(QuerySnapshot<Object?> snap) {
+    print('init with a remote snapshot');
+    final itemsByDocsRemote = snap.docs.fold<Map<String, List<String>>>({}, (
+      itemsByDocs,
+      nextDocSnapshot,
+    ) {
+      final items = List<String>.from(nextDocSnapshot['items'] ?? []);
+      itemsByDocs[nextDocSnapshot.id] = items;
+      return itemsByDocs;
+    });
+    itemsByDocuments.addAll(itemsByDocsRemote);
+    // todo: save to prefs??
+  }
+
+  void updateWithRemoteLaterSnapshot(QuerySnapshot<Object?> snap) {
+    print('update with a remote snapshot');
+    for (var change in snap.docChanges) {
+      final docId = change.doc.id;
+      final items = List<String>.from(change.doc['items'] ?? []);
+      if (change.type == DocumentChangeType.added ||
+          change.type == DocumentChangeType.modified) {
+        itemsByDocuments[docId] = items;
+      } else if (change.type == DocumentChangeType.removed) {
+        itemsByDocuments.remove(docId);
+      }
+    }
+  }
+
+  Scaffold render(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Project $projectName documents')),
       body: Padding(
         padding: EdgeInsets.all(16),
-        child: Column(
+        child: ListView(
           children: [
-            SizedBox(height: 12),
-            // Display documents in the project
+            AddListRow(onAdd: onAddDocument, hintText: 'Add subcategory'),
+            ...itemsByDocuments.entries.map((documentEntry) {
+              final documentName = documentEntry.key;
+              return ExpansionTile(
+                initiallyExpanded: true,
+                title: Text(
+                  documentName,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                trailing: SubcategoryRowButtons(
+                  context: context,
+                  category: projectName,
+                  subcategory: documentName,
+                  onRename: onRenameDocument,
+                  onRemove: onRemoveDocument,
+                ),
+                childrenPadding: EdgeInsets.all(16),
+                children: [
+                  SizedBox(
+                    height: documentEntry.value.length * 60,
+                    child: ReorderableListView.builder(
+                      itemCount: documentEntry.value.length,
+                      onReorder: (oldIdx, newIdx) => onReorderDocumentItems(
+                        documentEntry.key,
+                        oldIdx,
+                        newIdx,
+                      ),
+                      itemBuilder: (_, index) => ListTile(
+                        key: Key(documentEntry.value[index]),
+                        title: Text(documentEntry.value[index]),
+                        trailing: itemRowButtons(documentName, index),
+                      ),
+                    ),
+                  ),
+                  AddItemRow(subcategory: documentName, onAdd: onAddItem),
+                ],
+              );
+            }),
           ],
         ),
       ),
+    );
+  }
+
+  ItemRowButtons itemRowButtons(String documentName, int index) {
+    return ItemRowButtons(
+      subcategory: documentName,
+      itemIdx: index,
+      onRename: onRenameItem,
+      onRemove: onRemoveItem,
+      onResolve: onResolveItem,
     );
   }
 }

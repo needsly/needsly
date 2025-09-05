@@ -64,21 +64,21 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
       context,
       listen: false,
     );
-    final newCategory = controller.text.trim();
-    if (itemsBySubcategories.keys.contains(newCategory)) {
+    final newSubcategory = controller.text.trim();
+    if (itemsBySubcategories.keys.contains(newSubcategory)) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Subcategory already exists!')));
       return;
-    } else if (newCategory.isNotEmpty) {
+    } else if (newSubcategory.isNotEmpty) {
       setState(() {
-        itemsBySubcategories[newCategory] = [];
+        itemsBySubcategories[newSubcategory] = [];
         controller.clear();
       });
       prefsRepo.addSubcategoryWithItems(
         _personalCategoriesPrefix,
         category,
-        newCategory,
+        newSubcategory,
         [],
       );
     }

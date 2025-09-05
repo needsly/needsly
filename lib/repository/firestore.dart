@@ -6,6 +6,16 @@ class FirestoreRepository {
 
   FirestoreRepository({required this.firestore});
 
+  CollectionReference<Map<String, dynamic>> getCollection(String collection) {
+    return firestore.collection(collection);
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> collectionSnapshots(
+    String collection,
+  ) {
+    return firestore.collection(collection).snapshots();
+  }
+
   Future<int> getLatestVersion(String collection, String document) async {
     final versionDynamic = await firestore
         .collection(collection)
@@ -65,11 +75,80 @@ class FirestoreRepository {
     }, SetOptions(merge: true));
   }
 
+  Future<void> addDocumentWithData(
+    String collection,
+    String document,
+    Map<String, dynamic> data,
+  ) async {
+    firestore
+        .collection(collection)
+        .doc(document)
+        .set(data, SetOptions(merge: true));
+  }
+
+  Future<void> addItem(String collection, String document, String item) async {
+    // firestore.collection(collection).doc(document).update({
+    //   "items": [item],
+    // });
+    final fromDocSnapshot = await firestore
+        .collection(collection)
+        .doc(document)
+        .get();
+    final data = fromDocSnapshot.data();
+    if (data == null) return;
+    final itemsDynamic = data["items"];
+    final items = List<String>.from(itemsDynamic);
+
+    items.add(item);
+
+    await updateDocumentWithData(collection, document, {"items": items});
+  }
+
+  Future<void> renameItem(
+    String collection,
+    String document,
+    String fromItem,
+    String toItem,
+  ) async {
+    final fromDocSnapshot = await firestore
+        .collection(collection)
+        .doc(document)
+        .get();
+    final data = fromDocSnapshot.data();
+    if (data == null) return;
+    final itemsDynamic = data["items"];
+    final items = List<String>.from(itemsDynamic);
+
+    items.remove(fromItem);
+    items.add(toItem);
+
+    await updateDocumentWithData(collection, document, {"items": items});
+  }
+
+  Future<void> removeItem(
+    String collection,
+    String document,
+    String item,
+  ) async {
+    final fromDocSnapshot = await firestore
+        .collection(collection)
+        .doc(document)
+        .get();
+    final data = fromDocSnapshot.data();
+    if (data == null) return;
+    final itemsDynamic = data["items"];
+    final items = List<String>.from(itemsDynamic);
+
+    items.remove(item);
+
+    await updateDocumentWithData(collection, document, {"items": items});
+  }
+
   Future<void> deleteDocument(String collection, String document) async {
     firestore.collection(collection).doc(document).delete();
   }
 
-  Future<void> overwriteDocument(
+  Future<void> updateDocumentWithData(
     String collection,
     String document,
     Map<String, dynamic> items,
@@ -77,11 +156,17 @@ class FirestoreRepository {
     firestore.collection(collection).doc(document).set(items);
   }
 
-  Future<void> updateDocumentWithMerge(
+  Future<void> renameDocument(
     String collection,
-    String document,
-    Map<String, dynamic> items,
+    String fromDocument,
+    String toDocument,
   ) async {
-    firestore.collection(collection).doc(document).set(items);
+    final fromDocSnapshot = await firestore
+        .collection(collection)
+        .doc(fromDocument)
+        .get();
+    final data = fromDocSnapshot.data() ?? {};
+    await addDocumentWithData(collection, toDocument, data);
+    await deleteDocument(collection, fromDocument);
   }
 }

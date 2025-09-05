@@ -45,6 +45,8 @@ List<String> toStringList(dynamic value) {
   throw ArgumentError("Expected a List, got $value");
 }
 
+/// Merges map b on top of a map a.
+/// If a key exists both in a and b, the value from b will take precedence.
 Map<String, List<String>> mergeMaps(
   Map<String, List<String>> a,
   Map<String, List<String>> b,
