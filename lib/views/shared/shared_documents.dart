@@ -207,7 +207,12 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     firestoreRepository.removeItem('active', document, removedValue);
   }
 
-  void onResolveItem(String document, int itemIdx) {}
+  void onResolveItem(String document, int itemIdx) {
+    final item = itemsByDocuments[document]![itemIdx];
+    final resolvedAt = DateTime.now();
+    firestoreRepository.resolveItem(document, item, resolvedAt);
+    onRemoveItem(document, itemIdx);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -227,14 +232,12 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
         final snap = snapshot.data!;
 
-        print('snap metadata: ${snap.metadata}');
-
         if (snapshot.connectionState == ConnectionState.active &&
             snap.metadata.isFromCache == false &&
             itemsByDocuments.isEmpty) {
-          initWithRemoteFirstSnapshot(snap);
+          initStateWithRemoteFirstSnapshot(snap);
         } else {
-          updateWithRemoteLaterSnapshot(snap);
+          updateStateWithRemoteLaterSnapshot(snap);
         }
 
         return render(context);
@@ -242,7 +245,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     );
   }
 
-  void initWithRemoteFirstSnapshot(QuerySnapshot<Object?> snap) {
+  void initStateWithRemoteFirstSnapshot(QuerySnapshot<Object?> snap) {
     print('init with a remote snapshot');
     final itemsByDocsRemote = snap.docs.fold<Map<String, List<String>>>({}, (
       itemsByDocs,
@@ -255,7 +258,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     itemsByDocuments.addAll(itemsByDocsRemote);
   }
 
-  void updateWithRemoteLaterSnapshot(QuerySnapshot<Object?> snap) {
+  void updateStateWithRemoteLaterSnapshot(QuerySnapshot<Object?> snap) {
     print('update with a remote snapshot');
     for (var change in snap.docChanges) {
       final docId = change.doc.id;

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:needsly/dto/dto.dart';
 import 'package:needsly/utils/utils.dart';
 
 class FirestoreRepository {
@@ -95,13 +96,30 @@ class FirestoreRepository {
         .doc(document)
         .get();
     final data = fromDocSnapshot.data();
-    if (data == null) return;
-    final itemsDynamic = data["items"];
+    final itemsDynamic = data?["items"] ?? [];
     final items = List<String>.from(itemsDynamic);
 
     items.add(item);
 
     await updateDocumentWithData(collection, document, {"items": items});
+  }
+
+  Future<void> resolveItem(
+    String document,
+    String item,
+    DateTime resolvedAt,
+  ) async {
+    final docSnapshot = await firestore
+        .collection('resolved')
+        .doc(document)
+        .get();
+    final data = docSnapshot.data();
+    final itemsDynamic = data?["items"] ?? [];
+    final items = List<Map<String, dynamic>>.from(itemsDynamic);
+
+    items.add({"item": item, "resolved": resolvedAt});
+
+    await updateDocumentWithData('resolved', document, {"items": items});
   }
 
   Future<void> renameItem(
