@@ -281,6 +281,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
             icon: const Icon(Icons.share),
             tooltip: "Share access",
             onPressed: onShareAccess,
+            iconSize: 40.0,
           ),
         ],
       ),
