@@ -29,6 +29,9 @@ class SharedDocumentsPage extends StatefulWidget {
   );
 }
 
+// TODO: persist state changes to shared preferences as well??
+// That would allow an offline mode but meanwhile make sync more challenging
+// We'd need to keep client-server happen-before relation in order.
 class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   final _sharedProjectsPrefix = 'needsly.firebase.projects';
 
@@ -43,6 +46,41 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     required this.auth,
     required this.firestoreRepository,
   });
+
+  void onShareAccess() {
+    final TextEditingController shareWithController = TextEditingController(
+      text: "",
+    );
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text('Share access with'),
+          content: TextField(
+            controller: shareWithController,
+            decoration: InputDecoration(hintText: 'Type email here'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final shareWith = shareWithController.text.trim();
+                // todo: validate email format??
+                firestoreRepository.addDocument('allowed_users', shareWith);
+                Navigator.of(context).pop();
+              },
+              child: Text('Share'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void onReorderDocumentItems(String subcategory, int oldIdx, int newIdx) {
     final prefsRepo = Provider.of<SharedPreferencesRepository>(
@@ -75,13 +113,6 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         controller.clear();
       });
       firestoreRepository.addDocument('active', newDocument);
-      // todo: save to prefs as well??
-      // prefsRepo.addSubcategoryWithItems(
-      //   _sharedProjectsPrefix,
-      //   projectName,
-      //   newDocument,
-      //   [],
-      // );
     }
   }
 
@@ -92,7 +123,6 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
       itemsByDocuments[toDocument] = items ?? [];
     });
     firestoreRepository.renameDocument('active', fromDocument, toDocument);
-    // todo: save to prefs??
   }
 
   void onRemoveDocument(String document) {
@@ -117,12 +147,6 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         controller.clear();
       });
       firestoreRepository.addItem('active', document, text);
-      // prefsRepo.saveItems(
-      //   _personalCategoriesPrefix,
-      //   category,
-      //   subcategory,
-      //   updatedItems,
-      // );
     }
   }
 
@@ -157,12 +181,6 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
                   itemsByDocuments[document] = items;
                   renameController.clear();
                 });
-                // prefsRepo.saveItems(
-                //   _personalCategoriesPrefix,
-                //   category,
-                //   subcategory,
-                //   items,
-                // );
                 firestoreRepository.renameItem(
                   'active',
                   document,
@@ -187,12 +205,6 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
       itemsByDocuments[document] = items;
     });
     firestoreRepository.removeItem('active', document, removedValue);
-    // prefsRepo.saveItems(
-    //   _personalCategoriesPrefix,
-    //   category,
-    //   subcategory,
-    //   items,
-    // );
   }
 
   void onResolveItem(String document, int itemIdx) {}
@@ -241,7 +253,6 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
       return itemsByDocs;
     });
     itemsByDocuments.addAll(itemsByDocsRemote);
-    // todo: save to prefs??
   }
 
   void updateWithRemoteLaterSnapshot(QuerySnapshot<Object?> snap) {
@@ -260,7 +271,16 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
   Scaffold render(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Project $projectName documents')),
+      appBar: AppBar(
+        title: Text('Project $projectName documents'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: "Share access",
+            onPressed: onShareAccess,
+          ),
+        ],
+      ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: ListView(
