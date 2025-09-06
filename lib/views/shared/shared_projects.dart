@@ -65,7 +65,7 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
   }
 
   void onReorderSharedProjects(int oldIdx, int newIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
@@ -73,17 +73,17 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
     setState(() {
       sharedProjects.setAll(0, reorderedSharedProjects);
     });
-    prefsRepo.saveCategories(_sharedProjectsPrefix, reorderedSharedProjects);
+    prefs.saveCategories(_sharedProjectsPrefix, reorderedSharedProjects);
   }
 
   @override
   void initState() {
     super.initState();
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
-    loadSharedProjectsFromStorage(prefsRepo);
+    loadSharedProjectsFromStorage(prefs);
   }
 
   void loadSharedProjectsFromStorage(SharedPreferencesRepository prefs) {
