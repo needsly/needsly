@@ -22,7 +22,7 @@ class DatabaseRepository extends _$DatabaseRepository {
     String subcategory,
     String item,
     DateTime resolvedAt,
-  ) {
+  ) async {
     return into(resolvedItems).insert(
       ResolvedItemsCompanion.insert(
         category: category,

@@ -45,6 +45,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   final Map<String, List<String>> itemsByDocuments = {};
 
   late StreamSubscription<QuerySnapshot> _resolvedSubscription;
+  late StreamSubscription<DocumentSnapshot> _syncSubscription;
 
   SharedDocumentsPageState({
     required this.projectName,
@@ -240,22 +241,34 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     _resolvedSubscription = firestoreRepository
         .getCollection('resolved')
         .snapshots()
-        .listen((snap) {
-          for (var doc in snap.docs) {
-            final docData = doc.data();
-            final items = Map<String, Timestamp>.from(docData['items']);
-            print('doc: ${doc.id} items: $items');
+        .listen((resolvedCollectionSnap) {
+          for (var docChange in resolvedCollectionSnap.docChanges) {
+            final docData = docChange.doc.data();
+            final docId = docChange.doc.id;
+            final items = Map<String, Timestamp>.from(docData?['items']);
+            print('doc: $docId items: $items');
             // TODO: use batch
             for (var item in items.entries) {
               db.addResolvedItem(
                 'firebase.$projectName',
-                doc.id,
+                docId,
                 item.key,
                 item.value.toDate(),
               );
             }
           }
-          return setSyncFlag();
+          setSyncFlag();
+        });
+
+    _syncSubscription = firestoreRepository
+        .getCollection('sync')
+        .doc('resolved')
+        .snapshots()
+        .listen((syncResolvedSnap) {
+          final docData = syncResolvedSnap.data();
+          final docId = syncResolvedSnap.id;
+          final resolvedByEmail = Map<String, Timestamp>.from(docData ?? {});
+          firestoreRepository.cleanOutdatedResolved(resolvedByEmail);
         });
   }
 

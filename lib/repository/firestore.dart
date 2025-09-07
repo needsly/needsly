@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:needsly/dto/dto.dart';
 import 'package:needsly/utils/utils.dart';
+import 'package:collection/collection.dart';
 
 class FirestoreRepository {
   FirebaseFirestore firestore;
@@ -15,59 +16,6 @@ class FirestoreRepository {
     String collection,
   ) {
     return firestore.collection(collection).snapshots();
-  }
-
-  Future<int> getLatestVersion(String collection, String document) async {
-    final versionDynamic = await firestore
-        .collection(collection)
-        .doc(document)
-        .get()
-        .then((snapshot) {
-          return snapshot.data()?.values.last;
-        });
-
-    final int? version = int.tryParse(versionDynamic);
-    if (version.runtimeType != int) {
-      throw Exception('`version` field has invalid type!');
-    }
-    return version!;
-  }
-
-  Future<List<String>> listDocuments(String collection) async {
-    final docNames = await firestore.collection(collection).get().then((
-      snapshot,
-    ) {
-      return snapshot.docs.map((docSnapshot) => docSnapshot.id);
-    });
-    return docNames.toList();
-  }
-
-  Future<Map<String, List<String>>> listItemsByDocuments(
-    String collection,
-  ) async {
-    final itemsByDocuments = await firestore.collection(collection).get().then((
-      snapshot,
-    ) {
-      final docSnapshots = snapshot.docs;
-      return docSnapshots.fold<Map<String, List<String>>>({}, (prev, next) {
-        final docName = next.id;
-        final docItemsDynamic = next.get('items');
-        final items = toStringList(docItemsDynamic);
-        prev[docName] = items;
-        return prev;
-      });
-    });
-    return itemsByDocuments;
-  }
-
-  Future<List<dynamic>> listItems(String collection, String document) async {
-    final res = firestore.collection(collection).doc(document).get().then((
-      snapshot,
-    ) {
-      final items = snapshot.data()?.values ?? [];
-      return items.toList();
-    });
-    return res;
   }
 
   Future<void> addDocument(String collection, String document) async {
@@ -186,5 +134,42 @@ class FirestoreRepository {
     final data = fromDocSnapshot.data() ?? {};
     await addDocumentWithData(collection, toDocument, data);
     await deleteDocument(collection, fromDocument);
+  }
+
+  Future<void> cleanOutdatedResolved(
+    Map<String, Timestamp> resolvedByEmail,
+  ) async {
+    final allowedUsersCollectionSnap = await firestore
+        .collection('allowed_users')
+        .get();
+    final allowedUsers = allowedUsersCollectionSnap.docs
+        .map((doc) => doc.id)
+        .toList();
+
+    final unorderedEquals = const UnorderedIterableEquality().equals;
+
+    final shouldBeCleanedUp = unorderedEquals(
+      allowedUsers,
+      resolvedByEmail.keys,
+    );
+    if (!shouldBeCleanedUp) return;
+    // cleanup
+
+    final earliestSynced = resolvedByEmail.entries.reduce((prev, next) {
+      return prev.value.compareTo(next.value) < 0 ? prev : next;
+    }).value;
+
+    final resolvedCollectionSnap = await firestore.collection('resolved').get();
+    for (var docSnap in resolvedCollectionSnap.docs) {
+      final data = docSnap.data();
+      final itemsDynamic = data["items"] ?? {};
+      final items = Map<String, Timestamp>.from(itemsDynamic);
+      // Clean all items which were resolved earlier than the `earliestSynced` timestamp.
+      // So, we want to 
+      items.removeWhere((item, resolved) {
+        return resolved.compareTo(earliestSynced) < 0;
+      });
+      updateDocumentWithData('resolved', docSnap.id, items);
+    }
   }
 }
