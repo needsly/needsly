@@ -243,14 +243,15 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         .listen((snap) {
           for (var doc in snap.docs) {
             final docData = doc.data();
-            final items = Map<String, DateTime>.from(docData['items']);
+            final items = Map<String, Timestamp>.from(docData['items']);
+            print('doc: ${doc.id} items: $items');
             // TODO: use batch
             for (var item in items.entries) {
               db.addResolvedItem(
                 'firebase.$projectName',
                 doc.id,
                 item.key,
-                item.value,
+                item.value.toDate(),
               );
             }
           }
@@ -287,6 +288,12 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         return render(context);
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _resolvedSubscription.cancel();
+    super.dispose();
   }
 
   void initStateWithRemoteFirstSnapshot(QuerySnapshot<Object?> snap) {
