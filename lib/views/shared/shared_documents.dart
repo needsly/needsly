@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
+import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/firestore.dart';
 import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/utils/utils.dart';
@@ -40,6 +43,8 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   final FirestoreRepository firestoreRepository;
 
   final Map<String, List<String>> itemsByDocuments = {};
+
+  late StreamSubscription<QuerySnapshot> _resolvedSubscription;
 
   SharedDocumentsPageState({
     required this.projectName,
@@ -212,6 +217,45 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     final resolvedAt = DateTime.now();
     firestoreRepository.resolveItem(document, item, resolvedAt);
     onRemoveItem(document, itemIdx);
+  }
+
+  void setSyncFlag() {
+    final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('You are not logged in!')));
+      return;
+    }
+    final now = DateTime.now();
+    firestoreRepository.addDocumentWithData('sync', 'resolved', {
+      currentUser: now,
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final db = Provider.of<DatabaseRepository>(context, listen: false);
+    _resolvedSubscription = firestoreRepository
+        .getCollection('resolved')
+        .snapshots()
+        .listen((snap) {
+          for (var doc in snap.docs) {
+            final docData = doc.data();
+            final items = Map<String, DateTime>.from(docData['items']);
+            // TODO: use batch
+            for (var item in items.entries) {
+              db.addResolvedItem(
+                'firebase.$projectName',
+                doc.id,
+                item.key,
+                item.value,
+              );
+            }
+          }
+          return setSyncFlag();
+        });
   }
 
   @override

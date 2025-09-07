@@ -26,7 +26,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   SubcategoriesPageState({required this.category});
 
   void onRenameSubcategory(String fromSubcategory, String toSubcategory) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
@@ -35,7 +35,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
       itemsBySubcategories.remove(fromSubcategory);
       itemsBySubcategories[toSubcategory] = items ?? [];
     });
-    prefsRepo.renameSubcategory(
+    prefs.renameSubcategory(
       _personalCategoriesPrefix,
       category,
       fromSubcategory,
@@ -45,14 +45,14 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   }
 
   void onRemoveSubcategory(String subcategory) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
     setState(() {
       itemsBySubcategories.remove(subcategory);
     });
-    prefsRepo.updateSubcategories(
+    prefs.updateSubcategories(
       _personalCategoriesPrefix,
       category,
       itemsBySubcategories.keys.toList(),
@@ -60,7 +60,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   }
 
   void onAddSubcategory(TextEditingController controller) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
@@ -75,7 +75,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
         itemsBySubcategories[newSubcategory] = [];
         controller.clear();
       });
-      prefsRepo.addSubcategoryWithItems(
+      prefs.addSubcategoryWithItems(
         _personalCategoriesPrefix,
         category,
         newSubcategory,
@@ -85,7 +85,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   }
 
   void onAddItem(String subcategory, TextEditingController controller) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
@@ -102,7 +102,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
         itemsBySubcategories[subcategory] = updatedItems;
         controller.clear();
       });
-      prefsRepo.saveItems(
+      prefs.saveItems(
         _personalCategoriesPrefix,
         category,
         subcategory,
@@ -112,7 +112,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   }
 
   void onRenameItem(String subcategory, int itemIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
@@ -146,7 +146,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
                   itemsBySubcategories[subcategory] = items;
                   renameController.clear();
                 });
-                prefsRepo.saveItems(
+                prefs.saveItems(
                   _personalCategoriesPrefix,
                   category,
                   subcategory,
@@ -163,7 +163,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   }
 
   void onRemoveItem(String subcategory, int itemIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
@@ -173,7 +173,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
     setState(() {
       itemsBySubcategories[subcategory] = items;
     });
-    prefsRepo.saveItems(
+    prefs.saveItems(
       _personalCategoriesPrefix,
       category,
       subcategory,
@@ -185,12 +185,12 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
     final item = itemsBySubcategories[subcategory]![itemIdx];
     final resolvedAt = DateTime.now();
     final dbRepo = Provider.of<DatabaseRepository>(context, listen: false);
-    dbRepo.addResolved(category, subcategory, item, resolvedAt);
+    dbRepo.addResolvedItem(category, subcategory, item, resolvedAt);
     onRemoveItem(subcategory, itemIdx);
   }
 
   void onReorderSubcategoryItems(String subcategory, int oldIdx, int newIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
@@ -199,7 +199,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
     setState(() {
       itemsBySubcategories[subcategory] = reorderedItems;
     });
-    prefsRepo.saveItems(
+    prefs.saveItems(
       _personalCategoriesPrefix,
       category,
       subcategory,
@@ -210,15 +210,15 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   @override
   void initState() {
     super.initState();
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
+    final prefs = Provider.of<SharedPreferencesRepository>(
       context,
       listen: false,
     );
-    prefsRepo.loadSubcategories(_personalCategoriesPrefix, category).then((
+    prefs.loadSubcategories(_personalCategoriesPrefix, category).then((
       subcategories,
     ) {
       for (var subcategory in subcategories) {
-        prefsRepo
+        prefs
             .loadItems(_personalCategoriesPrefix, category, subcategory)
             .then((items) {
               setState(() {

@@ -17,7 +17,7 @@ class DatabaseRepository extends _$DatabaseRepository {
   @override
   int get schemaVersion => 1;
 
-  Future<int> addResolved(
+  Future<int> addResolvedItem(
     String category,
     String subcategory,
     String item,
