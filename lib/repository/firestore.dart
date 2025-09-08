@@ -147,10 +147,12 @@ class FirestoreRepository {
         .toList();
 
     final unorderedEquals = const UnorderedIterableEquality().equals;
-
     final shouldBeCleanedUp = unorderedEquals(
       allowedUsers,
       resolvedByEmail.keys,
+    );
+    print(
+      '[Clean outdated resolved] allowedUsers=$allowedUsers resolvedByEmail=${resolvedByEmail.keys} shouldBeCleanedUp=$shouldBeCleanedUp',
     );
     if (!shouldBeCleanedUp) return;
     // cleanup
@@ -158,17 +160,26 @@ class FirestoreRepository {
     final earliestSynced = resolvedByEmail.entries.reduce((prev, next) {
       return prev.value.compareTo(next.value) < 0 ? prev : next;
     }).value;
+    print(
+      '[Clean outdated resolved] resolvedByEmail timestamps=${resolvedByEmail.values} earliestSynced=$earliestSynced',
+    );
 
     final resolvedCollectionSnap = await firestore.collection('resolved').get();
     for (var docSnap in resolvedCollectionSnap.docs) {
       final data = docSnap.data();
       final itemsDynamic = data["items"] ?? {};
       final items = Map<String, Timestamp>.from(itemsDynamic);
+      print(
+        '[Clean outdated resolved] doc=${docSnap.id} resolved items before cleanup: $items',
+      );
       // Clean all items which were resolved earlier than the `earliestSynced` timestamp.
-      // So, we want to 
+      // So, we want to
       items.removeWhere((item, resolved) {
         return resolved.compareTo(earliestSynced) < 0;
       });
+      print(
+        '[Clean outdated resolved] doc=${docSnap.id} resolved items after cleanup: $items',
+      );
       updateDocumentWithData('resolved', docSnap.id, items);
     }
   }

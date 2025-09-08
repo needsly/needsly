@@ -229,6 +229,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
       return;
     }
     final now = DateTime.now();
+    print('[Set sync flag] $now for $currentUser');
     firestoreRepository.addDocumentWithData('sync', 'resolved', {
       currentUser: now,
     });
@@ -242,11 +243,16 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         .getCollection('resolved')
         .snapshots()
         .listen((resolvedCollectionSnap) {
-          for (var docChange in resolvedCollectionSnap.docChanges) {
+          final docChanges = resolvedCollectionSnap.docChanges;
+          var shouldSetSyncFlag = false;
+          for (var docChange in docChanges) {
             final docData = docChange.doc.data();
             final docId = docChange.doc.id;
-            final items = Map<String, Timestamp>.from(docData?['items']);
-            print('doc: $docId items: $items');
+            final items = Map<String, Timestamp>.from(docData?['items'] ?? {});
+            if (items.entries.isNotEmpty) {
+              shouldSetSyncFlag = true;
+            }
+            print('[received resolved snapshot] document=$docId items=$items');
             // TODO: use batch
             for (var item in items.entries) {
               db.addResolvedItem(
@@ -257,7 +263,10 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
               );
             }
           }
-          setSyncFlag();
+          // TODO: only call if previous operations were completed successfully
+          if (shouldSetSyncFlag) {
+            setSyncFlag();
+          }
         });
 
     _syncSubscription = firestoreRepository
@@ -266,7 +275,9 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         .snapshots()
         .listen((syncResolvedSnap) {
           final docData = syncResolvedSnap.data();
-          final docId = syncResolvedSnap.id;
+          print(
+            '[received sync.resolved snapshot] document=${syncResolvedSnap.id}',
+          );
           final resolvedByEmail = Map<String, Timestamp>.from(docData ?? {});
           firestoreRepository.cleanOutdatedResolved(resolvedByEmail);
         });
@@ -306,6 +317,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   @override
   void dispose() {
     _resolvedSubscription.cancel();
+    _syncSubscription.cancel();
     super.dispose();
   }
 
@@ -364,7 +376,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
                 ),
                 trailing: SubcategoryRowButtons(
                   context: context,
-                  category: projectName,
+                  category: 'firebase.$projectName',
                   subcategory: documentName,
                   onRename: onRenameDocument,
                   onRemove: onRemoveDocument,

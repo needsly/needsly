@@ -23,6 +23,9 @@ class DatabaseRepository extends _$DatabaseRepository {
     String item,
     DateTime resolvedAt,
   ) async {
+    print(
+      '[addResolvedItem] category=$category subcategory=$subcategory item=$item resolvedAt=$resolvedAt',
+    );
     return into(resolvedItems).insert(
       ResolvedItemsCompanion.insert(
         category: category,
@@ -45,7 +48,9 @@ class DatabaseRepository extends _$DatabaseRepository {
         (selectOnly(resolvedItems)
               ..addColumns([resolvedItems.subcategory, countExpr])
               ..where(resolvedItems.category.equals(category))
-              ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
+              ..where(
+                resolvedItems.resolvedAt.isBetweenValues(from, toInclusive),
+              )
               ..groupBy([resolvedItems.subcategory]))
             .get();
     final finalResult = result.then((r) {
