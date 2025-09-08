@@ -2,20 +2,20 @@ import 'package:drift/drift.dart';
 import 'package:drift/wasm.dart';
 
 DatabaseConnection openConnection() {
-  // Store in IndexedDB automatically
-  // return DatabaseConnection.delayed(
-  //   WasmDatabase.open(
-  //     databaseName: 'needsly_db', // visible in browser IndexedDB
-  //     sqlite3Uri: Uri.parse('sqlite3.wasm'), // drift bundles wasm internally
-  //   ),
-  // );
   return DatabaseConnection.delayed(
     Future(() async {
       final result = await WasmDatabase.open(
-        databaseName: 'needsly_db', // visible in browser IndexedDB
+        databaseName: 'needsly', // visible in browser IndexedDB
         sqlite3Uri: Uri.parse('sqlite3.wasm'), // drift bundles wasm internally
         driftWorkerUri: Uri.parse('drift_worker.js'),
       );
+
+      if (result.missingFeatures.isNotEmpty) {
+        print(
+          'Using ${result.chosenImplementation} due to missing browser '
+          'features: ${result.missingFeatures}',
+        );
+      }
 
       // (web.onResult ?? _defaultResultHandler)(result);
       return result.resolvedExecutor;
