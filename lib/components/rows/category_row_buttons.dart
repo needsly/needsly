@@ -9,6 +9,7 @@ class SubcategoryRowButtons extends StatelessWidget {
     required this.subcategory,
     required this.onRename,
     required this.onRemove,
+    required this.onCopy,
   });
 
   final String category;
@@ -16,6 +17,7 @@ class SubcategoryRowButtons extends StatelessWidget {
   final BuildContext context;
   final void Function(String, String) onRename;
   final void Function(String) onRemove;
+  final void Function(String) onCopy;
 
   void withRenameSubcategoryDialogue() {
     final TextEditingController renameController = TextEditingController(
@@ -82,6 +84,10 @@ class SubcategoryRowButtons extends StatelessWidget {
               ),
             );
           },
+        ),
+        IconButton(
+          icon: Icon(Icons.copy),
+          onPressed: () => onCopy(subcategory),
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
@@ -202,6 +203,15 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
     );
   }
 
+  void onCopySubcategory(String subcategory) {
+    final items = itemsBySubcategories[subcategory] ?? [];
+    final text = items.join(',');
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Copied to clipboard")));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -248,6 +258,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
                   subcategory: subcategoryKey,
                   onRename: onRenameSubcategory,
                   onRemove: onRemoveSubcategory,
+                  onCopy: onCopySubcategory,
                 ),
                 childrenPadding: EdgeInsets.all(16),
                 children: [

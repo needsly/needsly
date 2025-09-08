@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/category_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
@@ -220,6 +221,15 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     onRemoveItem(document, itemIdx);
   }
 
+  void onCopyDocument(String document) {
+    final items = itemsByDocuments[document] ?? [];
+    final text = items.join(',');
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Copied to clipboard")));
+  }
+
   void setSyncFlag() {
     final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
     if (currentUser == null) {
@@ -376,6 +386,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
                   subcategory: documentName,
                   onRename: onRenameDocument,
                   onRemove: onRemoveDocument,
+                  onCopy: onCopyDocument,
                 ),
                 childrenPadding: EdgeInsets.all(16),
                 children: [
