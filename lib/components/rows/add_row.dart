@@ -4,8 +4,7 @@ class AddListRow extends StatelessWidget {
   AddListRow({super.key, required this.onAdd, required this.hintText});
 
   final String hintText;
-  final TextEditingController addSubcategoryController =
-      TextEditingController();
+  final TextEditingController addController = TextEditingController();
   final void Function(TextEditingController) onAdd;
 
   @override
@@ -14,13 +13,14 @@ class AddListRow extends StatelessWidget {
       children: [
         Expanded(
           child: TextField(
-            controller: addSubcategoryController,
+            textInputAction: TextInputAction.done,
+            controller: addController,
             decoration: InputDecoration(hintText: hintText),
-            onSubmitted: (_) => onAdd,
+            onSubmitted: (_) => onAdd(addController),
           ),
         ),
         IconButton(
-          onPressed: () => onAdd(addSubcategoryController),
+          onPressed: () => onAdd(addController),
           icon: Icon(Icons.add),
         ),
       ],
