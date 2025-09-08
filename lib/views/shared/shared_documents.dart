@@ -240,8 +240,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     super.initState();
     final db = Provider.of<DatabaseRepository>(context, listen: false);
     _resolvedSubscription = firestoreRepository
-        .getCollection('resolved')
-        .snapshots()
+        .collectionSnapshots('resolved')
         .listen((resolvedCollectionSnap) {
           final docChanges = resolvedCollectionSnap.docChanges;
           var shouldSetSyncFlag = false;
@@ -270,9 +269,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         });
 
     _syncSubscription = firestoreRepository
-        .getCollection('sync')
-        .doc('resolved')
-        .snapshots()
+        .documentSnapshots('sync', 'resolved')
         .listen((syncResolvedSnap) {
           final docData = syncResolvedSnap.data();
           print(
@@ -285,9 +282,8 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final activeCollectionRef = firestoreRepository.getCollection('active');
     return StreamBuilder<QuerySnapshot>(
-      stream: activeCollectionRef.snapshots(),
+      stream: firestoreRepository.collectionSnapshots('active'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
