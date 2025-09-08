@@ -173,12 +173,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
     setState(() {
       itemsBySubcategories[subcategory] = items;
     });
-    prefs.saveItems(
-      _personalCategoriesPrefix,
-      category,
-      subcategory,
-      items,
-    );
+    prefs.saveItems(_personalCategoriesPrefix, category, subcategory, items);
   }
 
   void onResolveItem(String subcategory, int itemIdx) {
@@ -218,13 +213,13 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
       subcategories,
     ) {
       for (var subcategory in subcategories) {
-        prefs
-            .loadItems(_personalCategoriesPrefix, category, subcategory)
-            .then((items) {
-              setState(() {
-                itemsBySubcategories[subcategory] = items;
-              });
-            });
+        prefs.loadItems(_personalCategoriesPrefix, category, subcategory).then((
+          items,
+        ) {
+          setState(() {
+            itemsBySubcategories[subcategory] = items;
+          });
+        });
       }
     });
   }
