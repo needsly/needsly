@@ -30,5 +30,6 @@ flutter run --debug
 ## Run and connect to Chrome
 
 ```
+flutter build web
 flutter run -d chrome
 ```
