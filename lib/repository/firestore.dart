@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:needsly/dto/dto.dart';
-import 'package:needsly/utils/utils.dart';
 import 'package:collection/collection.dart';
 
 class FirestoreRepository {
@@ -8,14 +6,17 @@ class FirestoreRepository {
 
   FirestoreRepository({required this.firestore});
 
-  CollectionReference<Map<String, dynamic>> getCollection(String collection) {
-    return firestore.collection(collection);
-  }
-
   Stream<QuerySnapshot<Map<String, dynamic>>> collectionSnapshots(
     String collection,
   ) {
     return firestore.collection(collection).snapshots();
+  }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> documentSnapshots(
+    String collection,
+    String document,
+  ) {
+    return firestore.collection(collection).doc(document).snapshots();
   }
 
   Future<void> addDocument(String collection, String document) async {
@@ -127,13 +128,14 @@ class FirestoreRepository {
     String fromDocument,
     String toDocument,
   ) async {
-    final fromDocSnapshot = await firestore
-        .collection(collection)
-        .doc(fromDocument)
-        .get();
-    final data = fromDocSnapshot.data() ?? {};
-    await addDocumentWithData(collection, toDocument, data);
-    await deleteDocument(collection, fromDocument);
+    final fromDocRef = firestore.collection(collection).doc(fromDocument);
+    final toDocRef = firestore.collection(collection).doc(toDocument);
+    firestore.runTransaction((transaction) async {
+      final fromDocSnapshot = await transaction.get(fromDocRef);
+      final data = fromDocSnapshot.data() ?? {};
+      transaction.set(toDocRef, data);
+      transaction.delete(fromDocRef);
+    });
   }
 
   Future<void> cleanOutdatedResolved(
