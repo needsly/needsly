@@ -39,12 +39,13 @@ class DatabaseRepository extends _$DatabaseRepository {
     required DateTime to,
     required String category,
   }) async {
+    final toInclusive = to.add(const Duration(days: 1));
     final countExpr = resolvedItems.subcategory.count();
     final result =
         (selectOnly(resolvedItems)
               ..addColumns([resolvedItems.subcategory, countExpr])
               ..where(resolvedItems.category.equals(category))
-              ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
+              ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
               ..groupBy([resolvedItems.subcategory]))
             .get();
     final finalResult = result.then((r) {
@@ -53,7 +54,7 @@ class DatabaseRepository extends _$DatabaseRepository {
           category: category,
           subcategory: row.read(resolvedItems.subcategory)!,
           from: from,
-          to: to,
+          to: toInclusive,
           count: row.read(countExpr)!,
         );
       }).toList();
@@ -68,13 +69,14 @@ class DatabaseRepository extends _$DatabaseRepository {
     required String category,
     String? subcategory,
   }) async {
+    final toInclusive = to.add(const Duration(days: 1));
     final countExpr = resolvedItems.item.count();
     final result = getTopItemsPerPeriodQuery(
       countExpr,
       category,
       subcategory,
       from,
-      to,
+      toInclusive,
       limit,
     ).get();
     final finalResult = result.then((r) {
@@ -84,7 +86,7 @@ class DatabaseRepository extends _$DatabaseRepository {
           subcategory: subcategory,
           item: row.read(resolvedItems.item)!,
           from: from,
-          to: to,
+          to: toInclusive,
           count: row.read(countExpr)!,
         );
       }).toList();
@@ -101,11 +103,13 @@ class DatabaseRepository extends _$DatabaseRepository {
     DateTime to,
     int limit,
   ) {
+    final toInclusive = to.add(const Duration(days: 1));
+    print('getTopItemsPerPeriodQuery: from=$from to=$toInclusive');
     if (subcategory == null) {
       return (selectOnly(resolvedItems)
           ..addColumns([resolvedItems.item, countExpr])
           ..where(resolvedItems.category.equals(category))
-          ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
+          ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
           ..groupBy([resolvedItems.item]))
         ..limit(limit);
     } else {
@@ -113,7 +117,7 @@ class DatabaseRepository extends _$DatabaseRepository {
         ..addColumns([resolvedItems.item, countExpr])
         ..where(resolvedItems.category.equals(category))
         ..where(resolvedItems.subcategory.equals(subcategory))
-        ..where(resolvedItems.resolvedAt.isBetweenValues(from, to))
+        ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
         ..groupBy([resolvedItems.item]));
     }
   }
