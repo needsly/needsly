@@ -89,7 +89,7 @@ class StatsPageState extends State<StatsPage> {
             child: const Text(
               'Show more..',
               style: TextStyle(
-                color: Colors.blue,
+                color: Colors.white,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -158,7 +158,7 @@ class StatsPageState extends State<StatsPage> {
             child: const Text(
               'Show more..',
               style: TextStyle(
-                color: Colors.blue,
+                color: Colors.white,
                 decoration: TextDecoration.underline,
               ),
             ),
