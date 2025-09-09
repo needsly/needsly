@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:needsly/components/buttons/copy.dart';
+import 'package:needsly/components/buttons/share_access.dart';
 import 'package:needsly/components/rows/add_row.dart';
-import 'package:needsly/components/rows/category_row_buttons.dart';
+import 'package:needsly/components/rows/subcategory_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/firestore.dart';
@@ -221,9 +223,22 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     onRemoveItem(document, itemIdx);
   }
 
-  void onCopyDocument(String document) {
+  void onCopyDocumentItems(String document) {
     final items = itemsByDocuments[document] ?? [];
     final text = items.join(',');
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Copied to clipboard")));
+  }
+
+  void onCopyDocumentsWithItems() {
+    final text = itemsByDocuments.entries
+        .map(
+          (subcategoryEntry) =>
+              '${subcategoryEntry.key}: ${subcategoryEntry.value.join(", ")}',
+        )
+        .join('\n');
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(
       context,
@@ -359,58 +374,75 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
       appBar: AppBar(
         title: Text('Project $projectName documents'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            tooltip: "Share access",
-            onPressed: onShareAccess,
-            iconSize: 40.0,
-          ),
+          ShareAccessButton(onShareAccess: onShareAccess),
+          CopyInnerStructureButton(onCopy: onCopyDocumentsWithItems),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(10),
         child: ListView(
           children: [
-            AddListRow(onAdd: onAddDocument, hintText: 'Add subcategory'),
+            AddListRow(onAdd: onAddDocument, hintText: 'Add document'),
             ...itemsByDocuments.entries.map((documentEntry) {
               final documentName = documentEntry.key;
-              return ExpansionTile(
-                initiallyExpanded: true,
-                title: Text(
-                  documentName,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                trailing: SubcategoryRowButtons(
-                  context: context,
-                  category: 'firebase.$projectName',
-                  subcategory: documentName,
-                  onRename: onRenameDocument,
-                  onRemove: onRemoveDocument,
-                  onCopy: onCopyDocument,
-                ),
-                childrenPadding: EdgeInsets.all(16),
-                children: [
-                  SizedBox(
-                    height: documentEntry.value.length * 60,
-                    child: ReorderableListView.builder(
-                      itemCount: documentEntry.value.length,
-                      onReorder: (oldIdx, newIdx) => onReorderDocumentItems(
-                        documentEntry.key,
-                        oldIdx,
-                        newIdx,
-                      ),
-                      itemBuilder: (_, index) => ListTile(
-                        key: Key(documentEntry.value[index]),
-                        title: Text(documentEntry.value[index]),
-                        trailing: itemRowButtons(documentName, index),
-                      ),
-                    ),
-                  ),
-                  AddItemRow(subcategory: documentName, onAdd: onAddItem),
-                ],
+              return documentsWithItemsList(
+                documentName,
+                context,
+                documentEntry,
               );
             }),
           ],
+        ),
+      ),
+    );
+  }
+
+  ExpansionTile documentsWithItemsList(
+    String documentName,
+    BuildContext context,
+    MapEntry<String, List<String>> documentEntry,
+  ) {
+    return ExpansionTile(
+      tilePadding: EdgeInsets.all(10),
+      initiallyExpanded: true,
+      title: Text(documentName, style: TextStyle(fontWeight: FontWeight.bold)),
+      trailing: documentRowButtons(context, documentName),
+      childrenPadding: EdgeInsets.all(10),
+      children: [
+        itemsList(documentEntry, documentName),
+        AddItemRow(subcategory: documentName, onAdd: onAddItem),
+      ],
+    );
+  }
+
+  SubcategoryRowButtons documentRowButtons(
+    BuildContext context,
+    String documentName,
+  ) {
+    return SubcategoryRowButtons(
+      context: context,
+      category: 'firebase.$projectName',
+      subcategory: documentName,
+      onRename: onRenameDocument,
+      onRemove: onRemoveDocument,
+      onCopy: onCopyDocumentItems,
+    );
+  }
+
+  SizedBox itemsList(
+    MapEntry<String, List<String>> documentEntry,
+    String documentName,
+  ) {
+    return SizedBox(
+      height: documentEntry.value.length * 50,
+      child: ReorderableListView.builder(
+        itemCount: documentEntry.value.length,
+        onReorder: (oldIdx, newIdx) =>
+            onReorderDocumentItems(documentEntry.key, oldIdx, newIdx),
+        itemBuilder: (_, index) => ListTile(
+          key: Key(documentEntry.value[index]),
+          title: Text(documentEntry.value[index]),
+          trailing: itemRowButtons(documentName, index),
         ),
       ),
     );

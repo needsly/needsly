@@ -1,34 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:needsly/views/charts/stats.dart';
 
-class CategoryRowButtons extends StatelessWidget {
-  CategoryRowButtons({
+class SubcategoryRowButtons extends StatelessWidget {
+  SubcategoryRowButtons({
     super.key,
     required this.context,
     required this.category,
-    required this.index,
+    required this.subcategory,
     required this.onRename,
     required this.onRemove,
+    required this.onCopy,
   });
 
   final String category;
-  final int index;
+  final String subcategory;
   final BuildContext context;
-  final void Function(int, String) onRename;
-  final void Function(int) onRemove;
+  final void Function(String, String) onRename;
+  final void Function(String) onRemove;
+  final void Function(String) onCopy;
 
-  void withRenameCategoryDialogue() {
+  void withRenameSubcategoryDialogue() {
     final TextEditingController renameController = TextEditingController(
-      text: category,
+      text: subcategory,
     );
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Rename Category'),
+          title: Text('Rename subcategory'),
           content: TextField(
             controller: renameController,
-            decoration: InputDecoration(hintText: 'Enter new name'),
+            decoration: InputDecoration(hintText: 'Enter new subcategory name'),
           ),
           actions: [
             TextButton(
@@ -39,9 +42,11 @@ class CategoryRowButtons extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                onRename(index, renameController.text.trim());
-                Navigator.of(context).pop();
+                final toSubcategory = renameController.text.trim();
+                // comes from outside
+                onRename(subcategory, toSubcategory);
                 renameController.clear();
+                Navigator.of(context).pop();
               },
               child: Text('Rename'),
             ),
@@ -58,9 +63,12 @@ class CategoryRowButtons extends StatelessWidget {
       children: [
         IconButton(
           icon: Icon(Icons.edit),
-          onPressed: () => withRenameCategoryDialogue(),
+          onPressed: () => withRenameSubcategoryDialogue(),
         ),
-        IconButton(icon: Icon(Icons.delete), onPressed: () => onRemove(index)),
+        IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: () => onRemove(subcategory),
+        ),
         IconButton(
           icon: Icon(Icons.auto_graph),
           onPressed: () {
@@ -68,11 +76,18 @@ class CategoryRowButtons extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) {
-                  return StatsPage(category: category);
+                  return StatsPage(
+                    category: category,
+                    subcategory: subcategory,
+                  );
                 },
               ),
             );
           },
+        ),
+        IconButton(
+          icon: Icon(Icons.copy),
+          onPressed: () => onCopy(subcategory),
         ),
       ],
     );

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:needsly/components/buttons/copy.dart';
 import 'package:needsly/components/rows/add_row.dart';
-import 'package:needsly/components/rows/category_row_buttons.dart';
+import 'package:needsly/components/rows/subcategory_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/prefs.dart';
@@ -203,6 +204,19 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
     );
   }
 
+  void onCopySubcategoriesWithItems() {
+    final text = itemsBySubcategories.entries
+        .map(
+          (subcategoryEntry) =>
+              '${subcategoryEntry.key}: ${subcategoryEntry.value.join(", ")}',
+        )
+        .join('\n');
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Copied to clipboard")));
+  }
+
   void onCopySubcategory(String subcategory) {
     final items = itemsBySubcategories[subcategory] ?? [];
     final text = items.join(',');
@@ -237,7 +251,12 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(category)),
+      appBar: AppBar(
+        title: Text(category),
+        actions: [
+          CopyInnerStructureButton(onCopy: onCopySubcategoriesWithItems),
+        ],
+      ),
       body: Padding(
         padding: EdgeInsets.all(16),
 
