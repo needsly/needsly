@@ -216,23 +216,4 @@ class SharedPreferencesRepository {
       authDomain: authDomain,
     );
   }
-
-  Future<int> loadLatestSnapshotVersion(String projectName) async {
-    final prefs = await prefsFuture;
-    final latestSnapshotVersion = prefs.getInt(
-      'needsly.firebase.$projectName.snapshot.version',
-    );
-    return latestSnapshotVersion ?? Timestamp.now().seconds;
-  }
-
-  Future<void> updateLatestSnapshotVersion(
-    String projectName,
-    int latestVersion,
-  ) async {
-    final prefs = await prefsFuture;
-    prefs.setInt(
-      'needsly.firebase.$projectName.snapshot.version',
-      latestVersion,
-    );
-  }
 }
