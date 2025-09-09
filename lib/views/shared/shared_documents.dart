@@ -372,7 +372,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   Scaffold render(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Project $projectName documents'),
+        title: Text('$projectName documents'),
         actions: [
           ShareAccessButton(onShareAccess: onShareAccess),
           CopyInnerStructureButton(onCopy: onCopyDocumentsWithItems),
