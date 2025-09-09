@@ -91,9 +91,6 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
       setState(() {
         sharedProjects.addAll(projects.isNotEmpty ? projects : []);
       });
-      for (var project in projects) {
-        prefs.loadFirebaseProjectOptions(project).then((creds) {});
-      }
     });
   }
 
@@ -111,36 +108,41 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
               hintText: 'Add shared project',
             ),
             SizedBox(height: 16),
-            Expanded(
-              child: ReorderableListView.builder(
-                itemCount: sharedProjects.length,
-                itemBuilder: (_, idx) => ListTile(
-                  key: Key(sharedProjects[idx]),
-                  title: Text(sharedProjects[idx]),
-                  onTap: () async {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (ctx) {
-                          return getGoogleSignInPage(sharedProjects[idx]);
-                        },
-                      ),
-                    );
-                  },
-                  trailing: SharedProjectButtons(
-                    context: context,
-                    sharedProject: sharedProjects[idx],
-                    index: idx,
-                    onRemove: onRemoveSharedProject,
-                  ),
-                ),
-                onReorder: (oldIdx, newIdx) =>
-                    onReorderSharedProjects(oldIdx, newIdx),
-              ),
-            ),
+            Expanded(child: sharedProjectsList(context)),
           ],
         ),
       ),
+    );
+  }
+
+  ReorderableListView sharedProjectsList(BuildContext context) {
+    return ReorderableListView.builder(
+      itemCount: sharedProjects.length,
+      itemBuilder: (_, idx) => ListTile(
+        key: Key(sharedProjects[idx]),
+        title: Text(sharedProjects[idx]),
+        onTap: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (ctx) {
+                return getGoogleSignInPage(sharedProjects[idx]);
+              },
+            ),
+          );
+        },
+        trailing: sharedProjectButtons(context, idx),
+      ),
+      onReorder: (oldIdx, newIdx) => onReorderSharedProjects(oldIdx, newIdx),
+    );
+  }
+
+  SharedProjectButtons sharedProjectButtons(BuildContext context, int idx) {
+    return SharedProjectButtons(
+      context: context,
+      sharedProject: sharedProjects[idx],
+      index: idx,
+      onRemove: onRemoveSharedProject,
     );
   }
 }
