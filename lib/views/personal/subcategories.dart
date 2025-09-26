@@ -259,13 +259,13 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
-
         child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            AddListRow(onAdd: onAddSubcategory, hintText: 'Add subcategory'),
             ...itemsBySubcategories.entries.map((subcategoryEntry) {
               final subcategoryKey = subcategoryEntry.key;
               return ExpansionTile(
+                tilePadding: EdgeInsets.zero,
                 initiallyExpanded: true,
                 title: Text(
                   subcategoryKey,
@@ -279,11 +279,12 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
                   onRemove: onRemoveSubcategory,
                   onCopy: onCopySubcategory,
                 ),
-                childrenPadding: EdgeInsets.all(16),
+                childrenPadding: EdgeInsets.all(20),
                 children: [
                   SizedBox(
-                    height: subcategoryEntry.value.length * 60,
+                    height: subcategoryEntry.value.length * 50,
                     child: ReorderableListView.builder(
+                      padding: EdgeInsets.zero,
                       itemCount: subcategoryEntry.value.length,
                       onReorder: (oldIdx, newIdx) => onReorderSubcategoryItems(
                         subcategoryEntry.key,
@@ -291,6 +292,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
                         newIdx,
                       ),
                       itemBuilder: (_, index) => ListTile(
+                        contentPadding: EdgeInsets.zero,
                         key: Key(subcategoryEntry.value[index]),
                         title: Text(subcategoryEntry.value[index]),
                         trailing: ItemRowButtons(
@@ -307,6 +309,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
                 ],
               );
             }),
+            AddListRow(onAdd: onAddSubcategory, hintText: 'Add subcategory'),
           ],
         ),
       ),

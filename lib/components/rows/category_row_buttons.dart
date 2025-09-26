@@ -59,8 +59,13 @@ class CategoryRowButtons extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.edit),
           onPressed: () => withRenameCategoryDialogue(),
+          tooltip: 'Rename',
         ),
-        IconButton(icon: Icon(Icons.delete), onPressed: () => onRemove(index)),
+        IconButton(
+          icon: Icon(Icons.delete),
+          onPressed: () => onRemove(index),
+          tooltip: 'Delete',
+        ),
         IconButton(
           icon: Icon(Icons.auto_graph),
           onPressed: () {
@@ -73,6 +78,7 @@ class CategoryRowButtons extends StatelessWidget {
               ),
             );
           },
+          tooltip: 'Show stats',
         ),
         ReorderableDragStartListener(
           index: index,

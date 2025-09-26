@@ -64,10 +64,12 @@ class SubcategoryRowButtons extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.edit),
           onPressed: () => withRenameSubcategoryDialogue(),
+          tooltip: 'Rename',
         ),
         IconButton(
           icon: Icon(Icons.delete),
           onPressed: () => onRemove(subcategory),
+          tooltip: 'Delete',
         ),
         IconButton(
           icon: Icon(Icons.auto_graph),
@@ -84,10 +86,12 @@ class SubcategoryRowButtons extends StatelessWidget {
               ),
             );
           },
+          tooltip: 'Show stats',
         ),
         IconButton(
           icon: Icon(Icons.copy),
           onPressed: () => onCopy(subcategory),
+          tooltip: 'Copy list',
         ),
       ],
     );

@@ -24,14 +24,21 @@ class ItemRowButtons extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.edit),
           onPressed: () => onRename(subcategory, itemIdx),
+          tooltip: 'Rename',
         ),
         IconButton(
           icon: Icon(Icons.delete),
           onPressed: () => onRemove(subcategory, itemIdx),
+          tooltip: 'Delete',
         ),
         IconButton(
           icon: Icon(Icons.done),
           onPressed: () => onResolve(subcategory, itemIdx),
+          tooltip: 'Mark as done',
+        ),
+        ReorderableDragStartListener(
+          index: itemIdx,
+          child: Icon(Icons.drag_handle),
         ),
       ],
     );
