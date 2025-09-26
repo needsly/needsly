@@ -74,6 +74,10 @@ class CategoryRowButtons extends StatelessWidget {
             );
           },
         ),
+        ReorderableDragStartListener(
+          index: index,
+          child: Icon(Icons.drag_handle),
+        ),
       ],
     );
   }

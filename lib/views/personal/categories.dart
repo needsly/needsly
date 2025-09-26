@@ -110,13 +110,13 @@ class CategoriesPageState extends State<CategoriesPage> {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            SizedBox(height: 12),
-            AddListRow(onAdd: onAddCategory, hintText: 'Add category'),
-            SizedBox(height: 16),
-            Expanded(
+            SizedBox(
+              height: categories.length * 50,
               child: ReorderableListView.builder(
+                padding: EdgeInsets.zero,
                 itemCount: categories.length,
                 itemBuilder: (_, index) => ListTile(
+                  contentPadding: EdgeInsets.zero,
                   key: Key(categories[index]),
                   title: Text(categories[index]),
                   onTap: () {
@@ -141,6 +141,7 @@ class CategoriesPageState extends State<CategoriesPage> {
                     onReorderCategory(oldIdx, newIdx),
               ),
             ),
+            AddListRow(onAdd: onAddCategory, hintText: 'Add category'),
           ],
         ),
       ),
