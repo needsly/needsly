@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
 class AddListRow extends StatelessWidget {
-  AddListRow({super.key, required this.onAdd, required this.hintText});
+  AddListRow({
+    super.key,
+    required this.onAdd,
+    required this.hintText,
+    this.tooltipText,
+  });
 
   final String hintText;
+  late String? tooltipText;
   final TextEditingController addController = TextEditingController();
   final void Function(TextEditingController) onAdd;
 
@@ -23,8 +29,16 @@ class AddListRow extends StatelessWidget {
           onPressed: () => onAdd(addController),
           icon: Icon(Icons.add),
         ),
+        tooltipIcon(),
       ],
     );
+  }
+
+  Widget tooltipIcon() {
+    if (tooltipText == null) {
+      return const SizedBox.shrink();
+    }
+    return Tooltip(message: tooltipText, child: Icon(Icons.help_outline));
   }
 }
 

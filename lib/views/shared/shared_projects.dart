@@ -106,6 +106,7 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
             AddListRow(
               onAdd: onAddSharedProject,
               hintText: 'Add shared project',
+              tooltipText: 'Add a category (you can give it any name) based on an existing Firebase project. It will be used to sync data between users.',
             ),
             SizedBox(height: 16),
             Expanded(child: sharedProjectsList(context)),

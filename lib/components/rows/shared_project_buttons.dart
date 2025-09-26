@@ -43,6 +43,7 @@ class SharedProjectButtons extends StatelessWidget {
               ),
             );
           },
+          tooltip: 'Show stats',
         ),
         IconButton(
           icon: Icon(Icons.settings),
@@ -56,6 +57,7 @@ class SharedProjectButtons extends StatelessWidget {
               ),
             );
           },
+          tooltip: 'Open Firebase project Settings',
         ),
       ],
     );

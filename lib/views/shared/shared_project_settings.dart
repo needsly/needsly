@@ -120,34 +120,37 @@ class _SharedProjectSettingsPageState extends State<SharedProjectSettingsPage> {
         }
         return Scaffold(
           appBar: AppBar(title: Text('Firebase project $projectName settings')),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _projectIdController,
-                decoration: const InputDecoration(labelText: "Project Id"),
-              ),
-              TextField(
-                controller: _apiKeyController,
-                decoration: const InputDecoration(labelText: "API Key"),
-              ),
-              TextField(
-                controller: _appIdController,
-                decoration: const InputDecoration(labelText: "App ID"),
-              ),
-              TextField(
-                controller: _senderIdController,
-                decoration: const InputDecoration(
-                  labelText: "Messaging Sender ID",
+          body: Padding(
+            padding: EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: _projectIdController,
+                  decoration: const InputDecoration(labelText: "Project Id"),
                 ),
-              ),
-              TextField(
-                controller: _authDomainController,
-                decoration: const InputDecoration(labelText: "Auth domain"),
-              ),
-              const Spacer(),
-              saveButton(),
-            ],
+                TextField(
+                  controller: _apiKeyController,
+                  decoration: const InputDecoration(labelText: "API Key"),
+                ),
+                TextField(
+                  controller: _appIdController,
+                  decoration: const InputDecoration(labelText: "App ID"),
+                ),
+                TextField(
+                  controller: _senderIdController,
+                  decoration: const InputDecoration(
+                    labelText: "Messaging Sender ID",
+                  ),
+                ),
+                TextField(
+                  controller: _authDomainController,
+                  decoration: const InputDecoration(labelText: "Auth domain"),
+                ),
+                const Spacer(),
+                saveButton(),
+              ],
+            ),
           ),
         );
       },

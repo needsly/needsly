@@ -372,17 +372,16 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   Scaffold render(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('$projectName documents'),
+        title: Text('$projectName subcategories'),
         actions: [
           ShareAccessButton(onShareAccess: onShareAccess),
           CopyInnerStructureButton(onCopy: onCopyDocumentsWithItems),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(16),
         child: ListView(
           children: [
-            AddListRow(onAdd: onAddDocument, hintText: 'Add document'),
             ...itemsByDocuments.entries.map((documentEntry) {
               final documentName = documentEntry.key;
               return documentsWithItemsList(
@@ -391,6 +390,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
                 documentEntry,
               );
             }),
+            AddListRow(onAdd: onAddDocument, hintText: 'Add subcategory'),
           ],
         ),
       ),
@@ -403,11 +403,11 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     MapEntry<String, List<String>> documentEntry,
   ) {
     return ExpansionTile(
-      tilePadding: EdgeInsets.all(10),
+      tilePadding: EdgeInsets.all(0),
       initiallyExpanded: true,
       title: Text(documentName, style: TextStyle(fontWeight: FontWeight.bold)),
       trailing: documentRowButtons(context, documentName),
-      childrenPadding: EdgeInsets.all(10),
+      childrenPadding: EdgeInsets.all(20),
       children: [
         itemsList(documentEntry, documentName),
         AddItemRow(subcategory: documentName, onAdd: onAddItem),
@@ -436,10 +436,12 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     return SizedBox(
       height: documentEntry.value.length * 50,
       child: ReorderableListView.builder(
+        padding: EdgeInsets.all(0),
         itemCount: documentEntry.value.length,
         onReorder: (oldIdx, newIdx) =>
             onReorderDocumentItems(documentEntry.key, oldIdx, newIdx),
         itemBuilder: (_, index) => ListTile(
+          contentPadding: EdgeInsets.all(0),
           key: Key(documentEntry.value[index]),
           title: Text(documentEntry.value[index]),
           trailing: itemRowButtons(documentName, index),
