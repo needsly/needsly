@@ -118,7 +118,7 @@ class FirestoreRepository {
     firestore
         .collection(collection)
         .doc(document)
-        .set(items, SetOptions(merge: true));
+        .set(items);
   }
 
   Future<void> renameDocument(
@@ -158,7 +158,7 @@ class FirestoreRepository {
     final now = DateTime.now();
     return firestore.collection('sync').doc('resolved').set({
       resolvedBy: now,
-    }, SetOptions(merge: true));
+    });
   }
 
   Future<void> cleanOutdatedResolved(
