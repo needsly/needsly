@@ -33,3 +33,18 @@ flutter run --debug
 flutter build web
 flutter run -d chrome
 ```
+
+## Build and deploy as Github pages
+
+```
+flutter build web --base-href="/<repo-name>/"
+git checkout --orphan gh-pages
+git rm -rf .
+cp -r build/web/* .
+git add .
+git commit -m "Deploy web app"
+git push origin gh-pages --force
+```
+
+App will be available at `https://<username>.github.io/<repo-name>/`
+Make sure [github-pages](https://docs.github.com/en/pages/quickstart) is enabled in your github repository.
