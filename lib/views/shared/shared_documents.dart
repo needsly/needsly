@@ -80,7 +80,14 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
               onPressed: () {
                 final shareWith = shareWithController.text.trim();
                 // todo: validate email format??
-                firestoreRepository.addDocument('allowed_users', shareWith);
+                final currentUser =
+                    auth.currentUser?.email ?? auth.currentUser?.uid;
+                if (currentUser == null) return;
+                firestoreRepository.addDocument(
+                  'allowed_users',
+                  shareWith,
+                  currentUser,
+                );
                 Navigator.of(context).pop();
               },
               child: Text('Share'),
@@ -120,7 +127,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
       );
       final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
       if (currentUser == null) return;
-      firestoreRepository.addDocument(newDocument, currentUser);
+      firestoreRepository.addDocument('active', newDocument, currentUser);
       print('[onAddDocument] finish saving to firestore..');
     }
   }

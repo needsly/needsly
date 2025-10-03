@@ -24,8 +24,8 @@ class FirestoreRepository {
         .snapshots(includeMetadataChanges: false);
   }
 
-  Future<void> addDocument(String document, String updatedBy) async {
-    _updateDocumentWithData('active', document, {
+  Future<void> addDocument(String collection, String document, String updatedBy) async {
+    _updateDocumentWithData(collection, document, {
       "items": [],
       "updatedBy": updatedBy,
     });
