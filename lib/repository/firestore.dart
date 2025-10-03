@@ -9,39 +9,31 @@ class FirestoreRepository {
   Stream<QuerySnapshot<Map<String, dynamic>>> collectionSnapshots(
     String collection,
   ) {
-    return firestore.collection(collection).snapshots();
+    return firestore
+        .collection(collection)
+        .snapshots(includeMetadataChanges: false);
   }
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> documentSnapshots(
     String collection,
     String document,
   ) {
-    return firestore.collection(collection).doc(document).snapshots();
-  }
-
-  Future<void> addDocument(String collection, String document) async {
-    firestore.collection(collection).doc(document).set({
-      "items": [],
-    }, SetOptions(merge: true));
-  }
-
-  Future<void> addDocumentWithData(
-    String collection,
-    String document,
-    Map<String, dynamic> data,
-  ) async {
-    firestore
+    return firestore
         .collection(collection)
         .doc(document)
-        .set(data, SetOptions(merge: true));
+        .snapshots(includeMetadataChanges: false);
   }
 
-  Future<void> addItem(String collection, String document, String item) async {
-    // firestore.collection(collection).doc(document).update({
-    //   "items": [item],
-    // });
+  Future<void> addDocument(String document, String updatedBy) async {
+    _updateDocumentWithData('active', document, {
+      "items": [],
+      "updatedBy": updatedBy,
+    });
+  }
+
+  Future<void> addItem(String document, String item, String updatedBy) async {
     final fromDocSnapshot = await firestore
-        .collection(collection)
+        .collection('active')
         .doc(document)
         .get();
     final data = fromDocSnapshot.data();
@@ -50,7 +42,98 @@ class FirestoreRepository {
 
     items.add(item);
 
-    await updateDocumentWithData(collection, document, {"items": items});
+    await _updateDocumentWithData('active', document, {
+      "items": items,
+      "updatedBy": updatedBy,
+    });
+  }
+
+  Future<void> renameItem(
+    String document,
+    String fromItem,
+    String toItem,
+    String updatedBy,
+  ) async {
+    final fromDocSnapshot = await firestore
+        .collection('active')
+        .doc(document)
+        .get();
+    final data = fromDocSnapshot.data();
+    if (data == null) return;
+    final itemsDynamic = data["items"];
+    final items = List<String>.from(itemsDynamic);
+
+    items.remove(fromItem);
+    items.add(toItem);
+
+    await _updateDocumentWithData('active', document, {
+      "items": items,
+      "updatedBy": updatedBy,
+    });
+  }
+
+  Future<void> removeItem(
+    String document,
+    String item,
+    String updatedBy,
+  ) async {
+    final fromDocSnapshot = await firestore
+        .collection('active')
+        .doc(document)
+        .get();
+    final data = fromDocSnapshot.data();
+    if (data == null) return;
+    final itemsDynamic = data["items"];
+    final items = List<String>.from(itemsDynamic);
+
+    items.remove(item);
+
+    await _updateDocumentWithData('active', document, {
+      "items": items,
+      "updatedBy": updatedBy,
+    });
+  }
+
+  Future<void> deleteDocument(String document) async {
+    // todo: how to tell that  ??
+    firestore.collection('active').doc(document).delete();
+  }
+
+  Future<void> reorderItemsInDocument(
+    String document,
+    List<String> toItems,
+    String updatedBy,
+  ) async {
+    _updateDocumentWithData('active', document, {
+      "items": toItems,
+      "updatedBy": updatedBy,
+    });
+  }
+
+  Future<void> _updateDocumentWithData(
+    String collection,
+    String document,
+    Map<String, dynamic> items,
+  ) async {
+    firestore
+        .collection(collection)
+        .doc(document)
+        .set(items, SetOptions(merge: true));
+  }
+
+  Future<void> renameDocument(
+    String fromDocument,
+    String toDocument,
+    String updatedBy,
+  ) async {
+    final fromDocRef = firestore.collection('active').doc(fromDocument);
+    final toDocRef = firestore.collection('active').doc(toDocument);
+    firestore.runTransaction((transaction) async {
+      final fromDocSnapshot = await transaction.get(fromDocRef);
+      final data = fromDocSnapshot.data() ?? {};
+      transaction.set(toDocRef, {...data, "updatedBy": updatedBy});
+      transaction.delete(fromDocRef);
+    });
   }
 
   Future<void> resolveItem(
@@ -68,74 +151,14 @@ class FirestoreRepository {
 
     items.putIfAbsent(item, () => resolvedAt);
 
-    await updateDocumentWithData('resolved', document, {"items": items});
+    await _updateDocumentWithData('resolved', document, {"items": items});
   }
 
-  Future<void> renameItem(
-    String collection,
-    String document,
-    String fromItem,
-    String toItem,
-  ) async {
-    final fromDocSnapshot = await firestore
-        .collection(collection)
-        .doc(document)
-        .get();
-    final data = fromDocSnapshot.data();
-    if (data == null) return;
-    final itemsDynamic = data["items"];
-    final items = List<String>.from(itemsDynamic);
-
-    items.remove(fromItem);
-    items.add(toItem);
-
-    await updateDocumentWithData(collection, document, {"items": items});
-  }
-
-  Future<void> removeItem(
-    String collection,
-    String document,
-    String item,
-  ) async {
-    final fromDocSnapshot = await firestore
-        .collection(collection)
-        .doc(document)
-        .get();
-    final data = fromDocSnapshot.data();
-    if (data == null) return;
-    final itemsDynamic = data["items"];
-    final items = List<String>.from(itemsDynamic);
-
-    items.remove(item);
-
-    await updateDocumentWithData(collection, document, {"items": items});
-  }
-
-  Future<void> deleteDocument(String collection, String document) async {
-    firestore.collection(collection).doc(document).delete();
-  }
-
-  Future<void> updateDocumentWithData(
-    String collection,
-    String document,
-    Map<String, dynamic> items,
-  ) async {
-    firestore.collection(collection).doc(document).set(items);
-  }
-
-  Future<void> renameDocument(
-    String collection,
-    String fromDocument,
-    String toDocument,
-  ) async {
-    final fromDocRef = firestore.collection(collection).doc(fromDocument);
-    final toDocRef = firestore.collection(collection).doc(toDocument);
-    firestore.runTransaction((transaction) async {
-      final fromDocSnapshot = await transaction.get(fromDocRef);
-      final data = fromDocSnapshot.data() ?? {};
-      transaction.set(toDocRef, data);
-      transaction.delete(fromDocRef);
-    });
+  Future<void> addSyncResolved(String resolvedBy) {
+    final now = DateTime.now();
+    return firestore.collection('sync').doc('resolved').set({
+      resolvedBy: now,
+    }, SetOptions(merge: true));
   }
 
   Future<void> cleanOutdatedResolved(
@@ -182,7 +205,7 @@ class FirestoreRepository {
       print(
         '[Clean outdated resolved] doc=${docSnap.id} resolved items after cleanup: $items',
       );
-      updateDocumentWithData('resolved', docSnap.id, items);
+      _updateDocumentWithData('resolved', docSnap.id, items);
     }
   }
 }

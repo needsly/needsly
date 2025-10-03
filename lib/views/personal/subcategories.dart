@@ -265,6 +265,7 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
             ...itemsBySubcategories.entries.map((subcategoryEntry) {
               final subcategoryKey = subcategoryEntry.key;
               return ExpansionTile(
+                shape: const Border(),
                 tilePadding: EdgeInsets.zero,
                 initiallyExpanded: true,
                 title: Text(

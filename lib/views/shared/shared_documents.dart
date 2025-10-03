@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,7 +12,6 @@ import 'package:needsly/components/rows/subcategory_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/firestore.dart';
-import 'package:needsly/repository/prefs.dart';
 import 'package:needsly/utils/utils.dart';
 import 'package:provider/provider.dart';
 
@@ -92,20 +92,15 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   }
 
   void onReorderDocumentItems(String subcategory, int oldIdx, int newIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
-      context,
-      listen: false,
-    );
     final items = itemsByDocuments[subcategory] ?? [];
     final reorderedItems = reorderList(items, oldIdx, newIdx);
-    setState(() {
-      itemsByDocuments[subcategory] = reorderedItems;
-    });
-    prefsRepo.saveItems(
-      _sharedProjectsPrefix,
-      projectName,
+    itemsByDocuments[subcategory] = reorderedItems;
+    final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
+    if (currentUser == null) return;
+    firestoreRepository.reorderItemsInDocument(
       subcategory,
       reorderedItems,
+      currentUser,
     );
   }
 
@@ -117,28 +112,31 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
       ).showSnackBar(SnackBar(content: Text('Subcategory already exists!')));
       return;
     } else if (newDocument.isNotEmpty) {
-      setState(() {
-        itemsByDocuments[newDocument] = [];
-        controller.clear();
-      });
-      firestoreRepository.addDocument('active', newDocument);
+      print('[onAddDocument] start changing state..');
+      itemsByDocuments[newDocument] = [];
+      controller.clear();
+      print(
+        '[onAddDocument] finish changing state, start saving to firestore..',
+      );
+      final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
+      if (currentUser == null) return;
+      firestoreRepository.addDocument(newDocument, currentUser);
+      print('[onAddDocument] finish saving to firestore..');
     }
   }
 
   void onRenameDocument(String fromDocument, String toDocument) async {
     final items = itemsByDocuments[fromDocument];
-    setState(() {
-      itemsByDocuments.remove(fromDocument);
-      itemsByDocuments[toDocument] = items ?? [];
-    });
-    firestoreRepository.renameDocument('active', fromDocument, toDocument);
+    itemsByDocuments.remove(fromDocument);
+    itemsByDocuments[toDocument] = items ?? [];
+    final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
+    if (currentUser == null) return;
+    firestoreRepository.renameDocument(fromDocument, toDocument, currentUser);
   }
 
   void onRemoveDocument(String document) {
-    setState(() {
-      itemsByDocuments.remove(document);
-    });
-    firestoreRepository.deleteDocument('active', document);
+    itemsByDocuments.remove(document);
+    firestoreRepository.deleteDocument(document);
   }
 
   void onAddItem(String document, TextEditingController controller) {
@@ -151,11 +149,11 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
       return;
     } else if (text.isNotEmpty) {
       final updatedItems = [...items, text];
-      setState(() {
-        itemsByDocuments[document] = updatedItems;
-        controller.clear();
-      });
-      firestoreRepository.addItem('active', document, text);
+      itemsByDocuments[document] = updatedItems;
+      controller.clear();
+      final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
+      if (currentUser == null) return;
+      firestoreRepository.addItem(document, text, currentUser);
     }
   }
 
@@ -186,15 +184,16 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
                 final itemNewName = renameController.text.trim();
                 final removedValue = items.removeAt(itemIdx);
                 items.add(itemNewName);
-                setState(() {
-                  itemsByDocuments[document] = items;
-                  renameController.clear();
-                });
+                itemsByDocuments[document] = items;
+                renameController.clear();
+                final currentUser =
+                    auth.currentUser?.email ?? auth.currentUser?.uid;
+                if (currentUser == null) return;
                 firestoreRepository.renameItem(
-                  'active',
                   document,
                   removedValue,
                   itemNewName,
+                  currentUser,
                 );
                 Navigator.of(context).pop();
               },
@@ -210,10 +209,10 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     final items = itemsByDocuments[document];
     if (items == null) return;
     final removedValue = items.removeAt(itemIdx);
-    setState(() {
-      itemsByDocuments[document] = items;
-    });
-    firestoreRepository.removeItem('active', document, removedValue);
+    itemsByDocuments[document] = items;
+    final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
+    if (currentUser == null) return;
+    firestoreRepository.removeItem(document, removedValue, currentUser);
   }
 
   void onResolveItem(String document, int itemIdx) {
@@ -255,13 +254,12 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     }
     final now = DateTime.now();
     print('[Set sync flag] $now for $currentUser');
-    firestoreRepository.addDocumentWithData('sync', 'resolved', {
-      currentUser: now,
-    });
+    firestoreRepository.addSyncResolved(currentUser);
   }
 
   @override
   void initState() {
+    print('[initState]');
     super.initState();
     final db = Provider.of<DatabaseRepository>(context, listen: false);
     _resolvedSubscription = firestoreRepository
@@ -307,11 +305,16 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('[build]');
     return StreamBuilder<QuerySnapshot>(
       stream: firestoreRepository.collectionSnapshots('active'),
       builder: (context, snapshot) {
+        print(
+          'Received a new snapshot. Status = ${snapshot.connectionState}. Current state: ${itemsByDocuments.toString()}',
+        );
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          // return const Center(child: CircularProgressIndicator());
+          return render(context);
         }
         if (snapshot.hasError) {
           return Center(child: Text("Error: ${snapshot.error}"));
@@ -321,6 +324,21 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         }
 
         final snap = snapshot.data!;
+        final itemsByDocumentsSnap = fromSnapshot(snap);
+        final docChanges = snap.docChanges;
+
+        for (var change in docChanges) {
+          final snapDocId = change.doc.id;
+          final snapItems = List<String>.from(change.doc['items'] ?? []);
+          print(
+            '[change] type=${change.type} snap doc id = $snapDocId; items = $snapItems',
+          );
+        }
+        final mapsEq = const DeepCollectionEquality().equals;
+        final stateIsTheSame = mapsEq(itemsByDocuments, itemsByDocumentsSnap);
+        if (docChanges.isEmpty || stateIsTheSame) {
+          return render(context);
+        }
 
         if (snapshot.connectionState == ConnectionState.active &&
             snap.metadata.isFromCache == false &&
@@ -329,7 +347,6 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
         } else {
           updateStateWithRemoteLaterSnapshot(snap);
         }
-
         return render(context);
       },
     );
@@ -337,9 +354,26 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
   @override
   void dispose() {
+    print('[dispose]');
     _resolvedSubscription.cancel();
     _syncSubscription.cancel();
     super.dispose();
+  }
+
+  Map<String, List<String>> fromSnapshot(QuerySnapshot<Object?> snap) {
+    for (var change in snap.docChanges) {
+      print(
+        "doc=${change.doc.id}; has pending changes=${change.doc.metadata.hasPendingWrites}; from cache = ${change.doc.metadata.isFromCache}",
+      );
+    }
+    final itemsByDocuments = Map.fromEntries(
+      snap.docChanges.map((docChange) {
+        final docId = docChange.doc.id;
+        final items = List<String>.from(docChange.doc['items'] ?? []);
+        return MapEntry(docId, items);
+      }),
+    );
+    return itemsByDocuments;
   }
 
   void initStateWithRemoteFirstSnapshot(QuerySnapshot<Object?> snap) {
@@ -358,15 +392,35 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   void updateStateWithRemoteLaterSnapshot(QuerySnapshot<Object?> snap) {
     print('update with a remote snapshot');
     for (var change in snap.docChanges) {
-      final docId = change.doc.id;
-      final items = List<String>.from(change.doc['items'] ?? []);
+      final snapDocId = change.doc.id;
+      final snapItems = List<String>.from(change.doc['items'] ?? []);
       if (change.type == DocumentChangeType.added ||
           change.type == DocumentChangeType.modified) {
-        itemsByDocuments[docId] = items;
+        if (!isDocumentStateTheSame(snapDocId, snapItems)) {
+          itemsByDocuments[snapDocId] = snapItems;
+        } else {
+          print('Document $snapDocId state is the same');
+        }
       } else if (change.type == DocumentChangeType.removed) {
-        itemsByDocuments.remove(docId);
+        if (itemsByDocuments.containsKey(snapDocId)) {
+          itemsByDocuments.remove(snapDocId);
+        }
       }
     }
+  }
+
+  bool isDocumentStateTheSame(String snapDocId, List<String> snapItems) {
+    final unorderedEquals = const UnorderedIterableEquality().equals;
+    final docFromState = itemsByDocuments.keys.firstWhereOrNull(
+      (item) => item == snapDocId,
+    );
+    if (docFromState != null) {
+      final itemsState = itemsByDocuments[snapDocId];
+      if (itemsState != null) {
+        return unorderedEquals(itemsState, snapItems);
+      }
+    }
+    return false;
   }
 
   Scaffold render(BuildContext context) {
@@ -403,6 +457,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
     MapEntry<String, List<String>> documentEntry,
   ) {
     return ExpansionTile(
+      shape: const Border(),
       tilePadding: EdgeInsets.all(0),
       initiallyExpanded: true,
       title: Text(documentName, style: TextStyle(fontWeight: FontWeight.bold)),
