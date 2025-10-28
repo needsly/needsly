@@ -156,11 +156,14 @@ class FirestoreRepository {
 
   Future<void> addSyncResolved(String resolvedBy) {
     final now = DateTime.now();
-    return firestore.collection('sync').doc('resolved').set({
-      resolvedBy: now,
-    });
+    return firestore.collection('sync').doc('resolved').set({resolvedBy: now});
   }
 
+  /// Clean `resolved` collection.
+  /// This operation is needed to save firestore space and to not store resolved items eternally.
+  /// When resolved items are synced across user devices, resolved items will be available on a device's local storage.
+  /// So, resolved items stats should be visible.
+  /// However if a user uses two devices, one of them might not get all resolved items when another device has already synced them.
   Future<void> cleanOutdatedResolved(
     Map<String, Timestamp> resolvedByEmail,
   ) async {
@@ -172,6 +175,7 @@ class FirestoreRepository {
         .toList();
 
     final unorderedEquals = const UnorderedIterableEquality().equals;
+    // When everyone has synced resolved items
     final shouldBeCleanedUp = unorderedEquals(
       allowedUsers,
       resolvedByEmail.keys,
