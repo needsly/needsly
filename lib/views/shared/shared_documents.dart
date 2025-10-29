@@ -275,19 +275,22 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
           for (var docChange in docChanges) {
             final docData = docChange.doc.data();
             final docId = docChange.doc.id;
-            final items = Map<String, Timestamp>.from(docData?['items'] ?? {});
+            final items = Map<String, dynamic>.from(docData?['items'] ?? {});
             if (items.entries.isNotEmpty) {
               shouldSetSyncFlag = true;
             }
             print('[received resolved snapshot] document=$docId items=$items');
             // TODO: use batch
             for (var item in items.entries) {
-              db.addResolvedItem(
-                'firebase.$projectName',
-                docId,
-                item.key,
-                item.value.toDate(),
-              );
+              final timestamps = List<Timestamp>.from(item.value);
+              for (var ts in timestamps) {
+                db.addResolvedItem(
+                  'firebase.$projectName',
+                  docId,
+                  item.key,
+                  ts.toDate(),
+                );
+              }
             }
           }
           // TODO: only call if previous operations were completed successfully

@@ -147,9 +147,9 @@ class FirestoreRepository {
         .get();
     final data = docSnapshot.data();
     final itemsDynamic = data?["items"] ?? {};
-    final items = Map<String, dynamic>.from(itemsDynamic);
+    final items = Map<String, List<dynamic>>.from(itemsDynamic);
 
-    items.putIfAbsent(item, () => resolvedAt);
+    items.putIfAbsent(item, () => <dynamic>[]).add(resolvedAt);
 
     await _updateDocumentWithData('resolved', document, {"items": items});
   }
