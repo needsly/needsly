@@ -39,8 +39,6 @@ class SharedDocumentsPage extends StatefulWidget {
 // That would allow an offline mode but meanwhile make sync more challenging
 // We'd need to keep client-server happen-before relation in order.
 class SharedDocumentsPageState extends State<SharedDocumentsPage> {
-  final _sharedProjectsPrefix = 'needsly.firebase.projects';
-
   final String projectName;
   final FirebaseAuth auth;
   final FirestoreRepository firestoreRepository;
