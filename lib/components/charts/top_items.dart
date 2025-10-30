@@ -17,6 +17,7 @@ class TopItemsBarChart extends StatelessWidget {
       final item = entry.value;
 
       return BarChartGroupData(
+        barsSpace: 5,
         x: index,
         barRods: [
           BarChartRodData(
@@ -26,6 +27,7 @@ class TopItemsBarChart extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
           ),
         ],
+        showingTooltipIndicators: [0],
       );
     }).toList();
 
@@ -51,8 +53,7 @@ class TopItemsBarChart extends StatelessWidget {
                   }
                   return SideTitleWidget(
                     meta: meta,
-                    // axisSide: meta.axisSide,
-                    space: 6,
+                    space: 2,
                     child: RotatedBox(
                       quarterTurns: -1,
                       child: Text(
@@ -66,25 +67,7 @@ class TopItemsBarChart extends StatelessWidget {
             ),
             leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  if (value % 1 == 0) {
-                    return SideTitleWidget(
-                      meta: meta,
-                      space: 5,
-                      child: RotatedBox(
-                        quarterTurns: -1,
-                        child: Text(value.toInt().toString()),
-                      ),
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
-              ),
-            ),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
           borderData: FlBorderData(show: false),
         ),
