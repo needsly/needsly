@@ -47,6 +47,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
   late StreamSubscription<QuerySnapshot> _resolvedSubscription;
   late StreamSubscription<DocumentSnapshot> _syncSubscription;
+  late String firebaseProjectName = 'firebase.$projectName';
 
   SharedDocumentsPageState({
     required this.projectName,
@@ -285,7 +286,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
               final timestamps = List<Timestamp>.from(item.value);
               for (var ts in timestamps) {
                 db.addResolvedItem(
-                  'firebase.$projectName',
+                  firebaseProjectName,
                   docId,
                   item.key,
                   ts.toDate(),
@@ -484,7 +485,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   ) {
     return SubcategoryRowButtons(
       context: context,
-      category: 'firebase.$projectName',
+      category: firebaseProjectName,
       subcategory: documentName,
       onRename: onRenameDocument,
       onRemove: onRemoveDocument,
