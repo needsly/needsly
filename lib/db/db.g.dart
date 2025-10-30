@@ -120,7 +120,12 @@ class $ResolvedItemsTable extends ResolvedItems
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => const {};
+  Set<GeneratedColumn> get $primaryKey => {
+    category,
+    subcategory,
+    item,
+    resolvedAt,
+  };
   @override
   ResolvedItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';

@@ -39,8 +39,6 @@ class SharedDocumentsPage extends StatefulWidget {
 // That would allow an offline mode but meanwhile make sync more challenging
 // We'd need to keep client-server happen-before relation in order.
 class SharedDocumentsPageState extends State<SharedDocumentsPage> {
-  final _sharedProjectsPrefix = 'needsly.firebase.projects';
-
   final String projectName;
   final FirebaseAuth auth;
   final FirestoreRepository firestoreRepository;
@@ -49,6 +47,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
 
   late StreamSubscription<QuerySnapshot> _resolvedSubscription;
   late StreamSubscription<DocumentSnapshot> _syncSubscription;
+  late String firebaseProjectName = 'firebase.$projectName';
 
   SharedDocumentsPageState({
     required this.projectName,
@@ -277,19 +276,22 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
           for (var docChange in docChanges) {
             final docData = docChange.doc.data();
             final docId = docChange.doc.id;
-            final items = Map<String, Timestamp>.from(docData?['items'] ?? {});
+            final items = Map<String, dynamic>.from(docData?['items'] ?? {});
             if (items.entries.isNotEmpty) {
               shouldSetSyncFlag = true;
             }
             print('[received resolved snapshot] document=$docId items=$items');
             // TODO: use batch
             for (var item in items.entries) {
-              db.addResolvedItem(
-                'firebase.$projectName',
-                docId,
-                item.key,
-                item.value.toDate(),
-              );
+              final timestamps = List<Timestamp>.from(item.value);
+              for (var ts in timestamps) {
+                db.addResolvedItem(
+                  firebaseProjectName,
+                  docId,
+                  item.key,
+                  ts.toDate(),
+                );
+              }
             }
           }
           // TODO: only call if previous operations were completed successfully
@@ -483,7 +485,7 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   ) {
     return SubcategoryRowButtons(
       context: context,
-      category: 'firebase.$projectName',
+      category: firebaseProjectName,
       subcategory: documentName,
       onRename: onRenameDocument,
       onRemove: onRemoveDocument,

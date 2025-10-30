@@ -38,7 +38,7 @@ class SharedProjectButtons extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) {
-                  return StatsPage(category: sharedProject);
+                  return StatsPage(category: 'firebase.$sharedProject');
                 },
               ),
             );

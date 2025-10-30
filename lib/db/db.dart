@@ -8,6 +8,8 @@ class ResolvedItems extends Table {
   TextColumn get subcategory => text().withLength(min: 1, max: 100)();
   TextColumn get item => text().withLength(min: 1, max: 100)();
   DateTimeColumn get resolvedAt => dateTime().withDefault(currentDateAndTime)();
+  @override
+  Set<Column> get primaryKey => {category, subcategory, item, resolvedAt};
 }
 
 @DriftDatabase(tables: [ResolvedItems])
@@ -33,6 +35,7 @@ class DatabaseRepository extends _$DatabaseRepository {
         item: item,
         resolvedAt: Value(resolvedAt),
       ),
+      mode: InsertMode.insertOrIgnore,
     );
   }
 
