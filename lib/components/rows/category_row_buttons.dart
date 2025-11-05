@@ -51,35 +51,47 @@ class CategoryRowButtons extends StatelessWidget {
     );
   }
 
+  Widget showActionsPopup() {
+    return PopupMenuButton(
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'Rename',
+          child: Text('Rename'),
+          onTap: () => withRenameCategoryDialogue(),
+        ),
+        PopupMenuItem(
+          value: 'Delete',
+          child: Text('Delete'),
+          onTap: () => onRemove(index),
+        ),
+        PopupMenuItem(
+          value: 'Show stats',
+          child: Text('Show stats'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return StatsPage(category: category);
+              },
+            ),
+          ),
+        ),
+      ],
+      child: IconButton(
+        icon: Icon(Icons.arrow_circle_down_rounded),
+        onPressed: null,
+        tooltip: 'Actions',
+        iconSize: 40,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          icon: Icon(Icons.edit),
-          onPressed: () => withRenameCategoryDialogue(),
-          tooltip: 'Rename',
-        ),
-        IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: () => onRemove(index),
-          tooltip: 'Delete',
-        ),
-        IconButton(
-          icon: Icon(Icons.auto_graph),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return StatsPage(category: category);
-                },
-              ),
-            );
-          },
-          tooltip: 'Show stats',
-        ),
+        showActionsPopup(),
         ReorderableDragStartListener(
           index: index,
           child: Icon(Icons.drag_handle),
