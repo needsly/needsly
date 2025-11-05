@@ -51,7 +51,7 @@ class CategoryRowButtons extends StatelessWidget {
     );
   }
 
-  Widget showActionsPopup() {
+  Widget withActionsPopup() {
     return PopupMenuButton(
       itemBuilder: (context) => [
         PopupMenuItem(
@@ -91,7 +91,7 @@ class CategoryRowButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        showActionsPopup(),
+        withActionsPopup(),
         ReorderableDragStartListener(
           index: index,
           child: Icon(Icons.drag_handle),
