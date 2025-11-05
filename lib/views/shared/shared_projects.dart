@@ -3,7 +3,6 @@ import 'package:needsly/auth/google/google_signin.dart';
 import 'package:needsly/components/rows/add_row.dart';
 import 'package:needsly/components/rows/shared_project_buttons.dart';
 import 'package:needsly/repository/prefs.dart';
-import 'package:needsly/utils/utils.dart';
 import 'package:needsly/views/shared/shared_project_settings.dart';
 import 'package:provider/provider.dart';
 

@@ -6,7 +6,6 @@ import 'package:needsly/components/rows/subcategory_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/prefs.dart';
-import 'package:needsly/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 class SubcategoriesPage extends StatefulWidget {
