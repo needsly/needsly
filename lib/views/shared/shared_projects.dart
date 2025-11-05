@@ -64,18 +64,6 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
     prefs.removeCategory(_sharedProjectsPrefix, idx);
   }
 
-  void onReorderSharedProjects(int oldIdx, int newIdx) {
-    final prefs = Provider.of<SharedPreferencesRepository>(
-      context,
-      listen: false,
-    );
-    final reorderedSharedProjects = reorderList(sharedProjects, oldIdx, newIdx);
-    setState(() {
-      sharedProjects.setAll(0, reorderedSharedProjects);
-    });
-    prefs.saveCategories(_sharedProjectsPrefix, reorderedSharedProjects);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -116,8 +104,8 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
     );
   }
 
-  ReorderableListView sharedProjectsList(BuildContext context) {
-    return ReorderableListView.builder(
+  ListView sharedProjectsList(BuildContext context) {
+    return ListView.builder(
       itemCount: sharedProjects.length,
       itemBuilder: (_, idx) => ListTile(
         key: Key(sharedProjects[idx]),
@@ -134,7 +122,6 @@ class SharedProjectsPageState extends State<SharedProjectsPage> {
         },
         trailing: sharedProjectButtons(context, idx),
       ),
-      onReorder: (oldIdx, newIdx) => onReorderSharedProjects(oldIdx, newIdx),
     );
   }
 

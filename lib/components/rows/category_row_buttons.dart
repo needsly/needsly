@@ -78,7 +78,7 @@ class CategoryRowButtons extends StatelessWidget {
         ),
       ],
       child: IconButton(
-        icon: Icon(Icons.arrow_circle_down_rounded),
+        icon: Icon(Icons.menu_open_rounded),
         onPressed: null,
         tooltip: 'Actions',
         iconSize: 40,
@@ -88,15 +88,6 @@ class CategoryRowButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        withActionsPopup(),
-        ReorderableDragStartListener(
-          index: index,
-          child: Icon(Icons.drag_handle),
-        ),
-      ],
-    );
+    return Row(mainAxisSize: MainAxisSize.min, children: [withActionsPopup()]);
   }
 }

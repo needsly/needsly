@@ -35,20 +35,17 @@ class ItemRowButtons extends StatelessWidget {
           onTap: () => onResolve(subcategory, itemIdx),
         ),
       ],
+      child: IconButton(
+        icon: Icon(Icons.menu_open_rounded),
+        onPressed: null,
+        tooltip: 'Actions',
+        iconSize: 40,
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        withActionsPopup(),
-        ReorderableDragStartListener(
-          index: itemIdx,
-          child: Icon(Icons.drag_handle),
-        ),
-      ],
-    );
+    return Row(mainAxisSize: MainAxisSize.min, children: [withActionsPopup()]);
   }
 }

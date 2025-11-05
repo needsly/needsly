@@ -72,18 +72,6 @@ class CategoriesPageState extends State<CategoriesPage> {
     );
   }
 
-  void onReorderCategory(int oldIdx, int newIdx) {
-    final prefsRepo = Provider.of<SharedPreferencesRepository>(
-      context,
-      listen: false,
-    );
-    final reorderedCategories = reorderList(categories, oldIdx, newIdx);
-    setState(() {
-      categories.setAll(0, reorderedCategories);
-    });
-    prefsRepo.saveCategories(_personalCategoriesPrefix, reorderedCategories);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -112,7 +100,7 @@ class CategoriesPageState extends State<CategoriesPage> {
           children: [
             SizedBox(
               height: categories.length * 50,
-              child: ReorderableListView.builder(
+              child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: categories.length,
                 itemBuilder: (_, index) => ListTile(
@@ -137,8 +125,6 @@ class CategoriesPageState extends State<CategoriesPage> {
                     onRemove: onRemoveCategory,
                   ),
                 ),
-                onReorder: (oldIdx, newIdx) =>
-                    onReorderCategory(oldIdx, newIdx),
               ),
             ),
             AddListRow(onAdd: onAddCategory, hintText: 'Add category'),
