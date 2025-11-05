@@ -36,10 +36,6 @@ class ItemRowButtons extends StatelessWidget {
           onPressed: () => onResolve(subcategory, itemIdx),
           tooltip: 'Mark as done',
         ),
-        ReorderableDragStartListener(
-          index: itemIdx,
-          child: Icon(Icons.drag_handle),
-        ),
       ],
     );
   }

@@ -42,6 +42,21 @@ class TopItemsBarChart extends StatelessWidget {
                   .reduce((prev, next) => prev > next ? prev : next) *
               1.2),
           barGroups: barGroups,
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              tooltipPadding: EdgeInsets.all(5),
+              tooltipMargin: 5,
+              rotateAngle: -90, // rotate tooltip text & indicators too
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  rod.toY.toInt().toString(),
+                  const TextStyle(color: Colors.white),
+                );
+              },
+            ),
+          ),
+
           titlesData: FlTitlesData(
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(

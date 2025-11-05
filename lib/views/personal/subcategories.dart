@@ -6,7 +6,6 @@ import 'package:needsly/components/rows/subcategory_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/prefs.dart';
-import 'package:needsly/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 class SubcategoriesPage extends StatefulWidget {
@@ -186,24 +185,6 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
     onRemoveItem(subcategory, itemIdx);
   }
 
-  void onReorderSubcategoryItems(String subcategory, int oldIdx, int newIdx) {
-    final prefs = Provider.of<SharedPreferencesRepository>(
-      context,
-      listen: false,
-    );
-    final items = itemsBySubcategories[subcategory] ?? [];
-    final reorderedItems = reorderList(items, oldIdx, newIdx);
-    setState(() {
-      itemsBySubcategories[subcategory] = reorderedItems;
-    });
-    prefs.saveItems(
-      _personalCategoriesPrefix,
-      category,
-      subcategory,
-      reorderedItems,
-    );
-  }
-
   void onCopySubcategoriesWithItems() {
     final text = itemsBySubcategories.entries
         .map(
@@ -284,14 +265,9 @@ class SubcategoriesPageState extends State<SubcategoriesPage> {
                 children: [
                   SizedBox(
                     height: subcategoryEntry.value.length * 50,
-                    child: ReorderableListView.builder(
+                    child: ListView.builder(
                       padding: EdgeInsets.zero,
                       itemCount: subcategoryEntry.value.length,
-                      onReorder: (oldIdx, newIdx) => onReorderSubcategoryItems(
-                        subcategoryEntry.key,
-                        oldIdx,
-                        newIdx,
-                      ),
                       itemBuilder: (_, index) => ListTile(
                         contentPadding: EdgeInsets.zero,
                         key: Key(subcategoryEntry.value[index]),

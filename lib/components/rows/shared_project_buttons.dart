@@ -25,29 +25,30 @@ class SharedProjectButtons extends StatelessWidget {
     onRemove: onRemove,
   );
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(icon: Icon(Icons.delete), onPressed: () => onRemove(index)),
-        IconButton(
-          icon: Icon(Icons.auto_graph),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return StatsPage(category: 'firebase.$sharedProject');
-                },
-              ),
-            );
-          },
-          tooltip: 'Show stats',
+  Widget withActionsPopup() {
+    return PopupMenuButton(
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'Delete',
+          child: Text('Delete'),
+          onTap: () => onRemove(index),
         ),
-        IconButton(
-          icon: Icon(Icons.settings),
-          onPressed: () {
+        PopupMenuItem(
+          value: 'Show stats',
+          child: Text('Show stats'),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return StatsPage(category: 'firebase.$sharedProject');
+              },
+            ),
+          ),
+        ),
+        PopupMenuItem(
+          value: 'Open Firebase project settings',
+          child: Text('Open Firebase project settings'),
+          onTap: () => {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -55,11 +56,15 @@ class SharedProjectButtons extends StatelessWidget {
                   return SharedProjectSettingsPage(projectName: sharedProject);
                 },
               ),
-            );
+            ),
           },
-          tooltip: 'Open Firebase project Settings',
         ),
       ],
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisSize: MainAxisSize.min, children: [withActionsPopup()]);
   }
 }

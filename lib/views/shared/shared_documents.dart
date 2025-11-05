@@ -12,7 +12,6 @@ import 'package:needsly/components/rows/subcategory_row_buttons.dart';
 import 'package:needsly/components/rows/item_row_buttons.dart';
 import 'package:needsly/db/db.dart';
 import 'package:needsly/repository/firestore.dart';
-import 'package:needsly/utils/utils.dart';
 import 'package:provider/provider.dart';
 
 class SharedDocumentsPage extends StatefulWidget {
@@ -94,19 +93,6 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
           ],
         );
       },
-    );
-  }
-
-  void onReorderDocumentItems(String subcategory, int oldIdx, int newIdx) {
-    final items = itemsByDocuments[subcategory] ?? [];
-    final reorderedItems = reorderList(items, oldIdx, newIdx);
-    itemsByDocuments[subcategory] = reorderedItems;
-    final currentUser = auth.currentUser?.email ?? auth.currentUser?.uid;
-    if (currentUser == null) return;
-    firestoreRepository.reorderItemsInDocument(
-      subcategory,
-      reorderedItems,
-      currentUser,
     );
   }
 
@@ -499,11 +485,9 @@ class SharedDocumentsPageState extends State<SharedDocumentsPage> {
   ) {
     return SizedBox(
       height: documentEntry.value.length * 50,
-      child: ReorderableListView.builder(
+      child: ListView.builder(
         padding: EdgeInsets.all(0),
         itemCount: documentEntry.value.length,
-        onReorder: (oldIdx, newIdx) =>
-            onReorderDocumentItems(documentEntry.key, oldIdx, newIdx),
         itemBuilder: (_, index) => ListTile(
           contentPadding: EdgeInsets.all(0),
           key: Key(documentEntry.value[index]),
