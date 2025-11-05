@@ -56,24 +56,23 @@ class SubcategoryRowButtons extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: Icon(Icons.edit),
-          onPressed: () => withRenameSubcategoryDialogue(),
-          tooltip: 'Rename',
+  Widget withActionsPopup() {
+    return PopupMenuButton(
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'Rename',
+          child: Text('Rename'),
+          onTap: () => withRenameSubcategoryDialogue(),
         ),
-        IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: () => onRemove(subcategory),
-          tooltip: 'Delete',
+        PopupMenuItem(
+          value: 'Delete',
+          child: Text('Delete'),
+          onTap: () => onRemove(subcategory),
         ),
-        IconButton(
-          icon: Icon(Icons.auto_graph),
-          onPressed: () {
+        PopupMenuItem(
+          value: 'Show stats',
+          child: Text('Show stats'),
+          onTap: () => {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -84,16 +83,20 @@ class SubcategoryRowButtons extends StatelessWidget {
                   );
                 },
               ),
-            );
+            ),
           },
-          tooltip: 'Show stats',
         ),
-        IconButton(
-          icon: Icon(Icons.copy),
-          onPressed: () => onCopy(subcategory),
-          tooltip: 'Copy list',
+        PopupMenuItem(
+          value: 'Copy list',
+          child: Text('Copy list'),
+          onTap: () => onCopy(subcategory),
         ),
       ],
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisSize: MainAxisSize.min, children: [withActionsPopup()]);
   }
 }
