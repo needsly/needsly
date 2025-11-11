@@ -60,12 +60,6 @@ class SharedProjectButtons extends StatelessWidget {
           },
         ),
       ],
-      child: IconButton(
-        icon: Icon(Icons.menu_open_rounded),
-        onPressed: null,
-        tooltip: 'Actions',
-        iconSize: 40,
-      ),
     );
   }
 
