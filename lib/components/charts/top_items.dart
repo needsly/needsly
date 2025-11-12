@@ -60,6 +60,7 @@ class TopItemsBarChart extends StatelessWidget {
           titlesData: FlTitlesData(
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
+                reservedSize: 150,
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
                   final index = value.toInt();
