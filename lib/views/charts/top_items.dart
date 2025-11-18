@@ -91,7 +91,7 @@ class TopItemsState extends State<TopItems> {
     final dbRepo = Provider.of<DatabaseRepository>(context, listen: false);
     return FutureBuilder(
       future: dbRepo.getTopItems(
-        limit: 10,
+        limit: 100,
         from: from,
         to: to,
         category: category,
