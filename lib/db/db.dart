@@ -112,7 +112,6 @@ class DatabaseRepository extends _$DatabaseRepository {
     int limit,
   ) {
     final toInclusive = to.add(const Duration(days: 1));
-    print('getTopItemsPerPeriodQuery: from=$from to=$toInclusive');
     if (subcategory == null) {
       return (selectOnly(resolvedItems)
           ..addColumns([resolvedItems.item, countExpr])
@@ -122,11 +121,12 @@ class DatabaseRepository extends _$DatabaseRepository {
         ..limit(limit);
     } else {
       return (selectOnly(resolvedItems)
-        ..addColumns([resolvedItems.item, countExpr])
-        ..where(resolvedItems.category.equals(category))
-        ..where(resolvedItems.subcategory.equals(subcategory))
-        ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
-        ..groupBy([resolvedItems.item]));
+          ..addColumns([resolvedItems.item, countExpr])
+          ..where(resolvedItems.category.equals(category))
+          ..where(resolvedItems.subcategory.equals(subcategory))
+          ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
+          ..groupBy([resolvedItems.item]))
+        ..limit(limit);
     }
   }
 }
