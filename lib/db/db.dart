@@ -118,7 +118,8 @@ class DatabaseRepository extends _$DatabaseRepository {
           ..where(resolvedItems.category.equals(category))
           ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
           ..groupBy([resolvedItems.item]))
-        ..limit(limit);
+        ..limit(limit)
+        ..orderBy([OrderingTerm.desc(resolvedItems.resolvedAt)]);
     } else {
       return (selectOnly(resolvedItems)
           ..addColumns([resolvedItems.item, countExpr])
@@ -126,7 +127,8 @@ class DatabaseRepository extends _$DatabaseRepository {
           ..where(resolvedItems.subcategory.equals(subcategory))
           ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
           ..groupBy([resolvedItems.item]))
-        ..limit(limit);
+        ..limit(limit)
+        ..orderBy([OrderingTerm.desc(resolvedItems.resolvedAt)]);
     }
   }
 }
