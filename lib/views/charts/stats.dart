@@ -75,7 +75,7 @@ class StatsPageState extends State<StatsPage> {
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 250, child: buildTopItemsChart()),
+          buildTopItemsChart(),
           InkWell(
             onTap: () {
               Navigator.push(

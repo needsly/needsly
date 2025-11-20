@@ -31,61 +31,77 @@ class TopItemsBarChart extends StatelessWidget {
       );
     }).toList();
 
+    const double groupWidth = 50;
+    double chartWidth = barGroups.length * groupWidth;
+
     return RotatedBox(
       quarterTurns: 1,
-      child: BarChart(
-        BarChartData(
-          alignment: BarChartAlignment.spaceAround,
-          maxY:
-              (itemRepetitions
-                  .map((itemRepetition) => itemRepetition.count)
-                  .reduce((prev, next) => prev > next ? prev : next) *
-              1.2),
-          barGroups: barGroups,
-          barTouchData: BarTouchData(
-            enabled: true,
-            touchTooltipData: BarTouchTooltipData(
-              tooltipPadding: EdgeInsets.all(5),
-              tooltipMargin: 5,
-              rotateAngle: -90, // rotate tooltip text & indicators too
-              getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                return BarTooltipItem(
-                  rod.toY.toInt().toString(),
-                  const TextStyle(color: Colors.white),
-                );
-              },
-            ),
-          ),
-
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                reservedSize: 150,
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  final index = value.toInt();
-                  if (index < 0 || index >= itemRepetitions.length) {
-                    return const SizedBox();
-                  }
-                  return SideTitleWidget(
-                    meta: meta,
-                    space: 2,
-                    child: RotatedBox(
-                      quarterTurns: -1,
-                      child: Text(
-                        itemRepetitions[index].item,
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                    ),
-                  );
-                },
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: chartWidth,
+          height: 500,
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceBetween,
+              maxY:
+                  (itemRepetitions
+                      .map((itemRepetition) => itemRepetition.count)
+                      .reduce((prev, next) => prev > next ? prev : next) *
+                  1.2),
+              barGroups: barGroups,
+              barTouchData: BarTouchData(
+                enabled: true,
+                touchTooltipData: BarTouchTooltipData(
+                  tooltipPadding: EdgeInsets.all(5),
+                  tooltipMargin: 5,
+                  rotateAngle: -90, // rotate tooltip text & indicators too
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    return BarTooltipItem(
+                      rod.toY.toInt().toString(),
+                      const TextStyle(color: Colors.white),
+                    );
+                  },
+                ),
               ),
+
+              titlesData: FlTitlesData(
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    reservedSize: 150,
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.toInt();
+                      if (index < 0 || index >= itemRepetitions.length) {
+                        return const SizedBox();
+                      }
+                      return SideTitleWidget(
+                        meta: meta,
+                        space: 2,
+                        child: RotatedBox(
+                          quarterTurns: -1,
+                          child: Text(
+                            itemRepetitions[index].item,
+                            style: const TextStyle(fontSize: 10),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+              ),
+              borderData: FlBorderData(show: false),
             ),
-            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          borderData: FlBorderData(show: false),
         ),
       ),
     );
