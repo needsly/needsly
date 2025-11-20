@@ -118,17 +118,17 @@ class DatabaseRepository extends _$DatabaseRepository {
           ..where(resolvedItems.category.equals(category))
           ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
           ..groupBy([resolvedItems.item]))
-        ..limit(limit)
-        ..orderBy([OrderingTerm.desc(resolvedItems.resolvedAt)]);
+        ..orderBy([OrderingTerm.desc(resolvedItems.item.count())])
+        ..limit(limit);
     } else {
       return (selectOnly(resolvedItems)
-          ..addColumns([resolvedItems.item, countExpr])
-          ..where(resolvedItems.category.equals(category))
-          ..where(resolvedItems.subcategory.equals(subcategory))
-          ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
-          ..groupBy([resolvedItems.item]))
-        ..limit(limit)
-        ..orderBy([OrderingTerm.desc(resolvedItems.resolvedAt)]);
+        ..addColumns([resolvedItems.item, countExpr])
+        ..where(resolvedItems.category.equals(category))
+        ..where(resolvedItems.subcategory.equals(subcategory))
+        ..where(resolvedItems.resolvedAt.isBetweenValues(from, toInclusive))
+        ..groupBy([resolvedItems.item])
+        ..orderBy([OrderingTerm.desc(resolvedItems.item.count())])
+        ..limit(limit));
     }
   }
 }
