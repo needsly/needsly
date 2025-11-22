@@ -80,7 +80,7 @@ class TopItemsState extends State<TopItems> {
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 250, child: buildTopItemsChart()),
+          buildTopItemsChart(),
         ],
       ),
     );
