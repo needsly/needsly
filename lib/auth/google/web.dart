@@ -41,9 +41,6 @@ class GoogleSignInPage extends StatelessWidget {
 
           final googleCredential = await _signInWithGoogle(firebaseAuth);
           if (googleCredential != null) {
-            print(
-              "Signed in with credential: accessToken=${googleCredential.accessToken} token=${googleCredential.token}",
-            );
             // TODO: catch
             await firebaseAuth.signInWithCredential(googleCredential);
             projectToApp[projectName] = firebaseApp;
