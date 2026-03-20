@@ -9,6 +9,12 @@ It is simple:
 - Observe stats
 - Work on shared by network items in collaboration
 
+<img width="1847" height="317" alt="image" src="https://github.com/user-attachments/assets/e3f6b364-0328-4e2c-ba1e-ef4637907398" />
+
+<img width="1847" height="317" alt="image" src="https://github.com/user-attachments/assets/dc459b06-560e-4629-899c-4b801e7e266a" />
+
+
+
 ## Prerequisites for development
 
 [Flutter](https://docs.flutter.dev/get-started/install)
